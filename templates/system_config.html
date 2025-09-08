@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <meta charset="UTF-8">
+    <title>{{ t("System Configuration") }}</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f8;
+        }
+
+        .header {
+            position: sticky;
+            top: 0;
+            background-color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            z-index: 100;
+        }
+
+        .header img {
+            height: 50px;
+        }
+
+        .header h1 {
+            font-size: 20px;
+            margin: 0;
+            flex: 1;
+            text-align: center;
+        }
+
+        .scripts-button {
+            background-color: #28a745;
+            color: white;
+            padding: 8px 14px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            text-decoration: none;
+            margin-left: 10px;
+        }
+
+        .scripts-button:hover {
+            background-color: #218838;
+        }
+
+        form {
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 25px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        summary {
+            font-weight: bold;
+            font-size: 1.1em;
+            cursor: pointer;
+            padding: 15px 20px;
+            background-color: #f1f1f1;
+            border-radius: 6px;
+        }
+
+        details {
+            margin-top: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .form-section {
+            padding: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            width: 250px;
+            font-weight: 600;
+        }
+
+        .form-group input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            margin-top: 10px;
+        }
+
+        th, td {
+            border: 1px solid #e0e0e0;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f8f8f8;
+        }
+
+        .button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .button:hover {
+            background: #218838;
+        }
+
+        .toast {
+            visibility: hidden;
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            border-radius: 4px;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            visibility: visible;
+            animation: fadein 0.5s, fadeout 0.5s 3s;
+        }
+
+        @keyframes fadein {
+            from { top: 0; opacity: 0; }
+            to { top: 20px; opacity: 1; }
+        }
+
+        @keyframes fadeout {
+            from { top: 20px; opacity: 1; }
+            to { top: 0; opacity: 0; }
+        }
+
+        .lang-select {
+            margin-left: 15px;
+            padding: 6px;
+            border-radius: 4px;
+        }
+
+        @media (max-width: 600px) {
+            .form-group {
+                flex-direction: column;
+            }
+
+            .form-group label {
+                width: 100%;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .header h1 {
+                text-align: center;
+            }
+
+            .lang-select {
+                margin-top: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <img src="{{ url_for('static', filename='krcs.png') }}">
+    <h1>{{ t("System Configuration") }}</h1>
+    <div>
+        <a href="/scripts" class="scripts-button">{{ t("Go to Scripts Page") }}</a>
+        <select class="lang-select" onchange="changeLang(this)">
+            <option value="en" {% if lang == 'en' %}selected{% endif %}>English</option>
+            <option value="ky" {% if lang == 'ky' %}selected{% endif %}>Кыргызча</option>
+            <option value="ru" {% if lang == 'ru' %}selected{% endif %}>Русский</option>
+        </select>
+    </div>
+</div>
+
+<form method="POST">
+
+    <!-- Webhook URL -->
+    <details open>
+        <summary>Webhook & API</summary>
+        <div class="form-section">
+            <div class="form-group">
+                <label>B24 Webhook URL:</label>
+                <input type="text" name="B24_WEBHOOK_URL" value="{{ config['B24_WEBHOOK_URL'] }}">
+            </div>
+        </div>
+    </details>
+
+    <!-- Matching Fields Section -->
+    <details open>
+        <summary>{{ t("Matching fields") }}</summary>
+        <div class="form-section">
+            <table id="match-table">
+                <thead>
+                    <tr>
+                        <th>{{ t("Optional name") }}</th>
+                        <th>{{ t("Beneficiary field") }}</th>
+                        <th>{{ t("Project field") }}</th>
+                        <th>Delete</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in config['MATCHING_FIELDS'] %}
+                    <tr>
+                        <td><input name="optional_name_{{ loop.index0 }}" value="{{ row.optional_name }}" style="width: 100%;"></td>
+                        <td><input name="beneficiary_field_{{ loop.index0 }}" value="{{ row.beneficiary_field }}" style="width: 100%;"></td>
+                        <td><input name="project_field_{{ loop.index0 }}" value="{{ row.project_field }}" style="width: 100%;"></td>
+                        <td><button type="button" onclick="deleteRow(this)">X</button></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <input type="hidden" id="match_field_count" name="match_field_count" value="{{ config['MATCHING_FIELDS']|length }}">
+            <button type="button" onclick="addRow()" class="button">+ {{ t("Add Field") }}</button>
+        </div>
+    </details>
+
+    <!-- Entity IDs Section -->
+    <details open>
+        <summary>Entity Type IDs</summary>
+        <div class="form-section">
+            {% for field in [
+                "PROJECT_ENTITY_TYPE_ID", "BENEFICIARY_ENTITY_TYPE_ID",
+                "PAYMENT_ENTITY_TYPE_ID", "CHILD_ENTITY_TYPE_ID"
+            ] %}
+            <div class="form-group">
+                <label>{{ field.replace("_", " ").title() }}:</label>
+                <input type="text" name="{{ field }}" value="{{ config[field] }}">
+            </div>
+            {% endfor %}
+        </div>
+    </details>
+
+    <!-- Eligibility Posting Section -->
+    <details>
+        <summary>Eligibility Posting Fields</summary>
+        <div class="form-section">
+            {% for field in [
+                "ELIGIBILITY_FIELD_ID", "PROGRAM_COUNT_FIELD_ID", "PROGRAM_NAMES_FIELD_ID"
+            ] %}
+            <div class="form-group">
+                <label>{{ field.replace("_", " ").title() }}:</label>
+                <input type="text" name="{{ field }}" value="{{ config[field] }}">
+            </div>
+            {% endfor %}
+        </div>
+    </details>
+
+    <!-- Beneficiary Stage IDs -->
+    <details>
+        <summary>Beneficiary Stage IDs</summary>
+        <div class="form-section">
+            {% for field in [
+                "REGISTRATION_STAGE_ID", "VERIFIED_STAGE_ID", "ELIGIBLE_STAGE_ID", "COMPLETED_STAGE_ID"
+            ] %}
+            <div class="form-group">
+                <label>{{ field.replace("_", " ").title() }}:</label>
+                <input type="text" name="{{ field }}" value="{{ config[field] }}">
+            </div>
+            {% endfor %}
+        </div>
+    </details>
+
+    <!-- Project Stage ID -->
+    <details>
+        <summary>Project Stage ID</summary>
+        <div class="form-section">
+            <div class="form-group">
+                <label>STAGE_ID:</label>
+                <input type="text" name="STAGE_ID" value="{{ config['STAGE_ID'] }}">
+            </div>
+        </div>
+    </details>
+
+    <!-- Duplicate Check -->
+    <details>
+        <summary>Duplicate Check Fields</summary>
+        <div class="form-section">
+            {% for field in [
+                "DUPLICATE_CHECK_NATIONAL_ID_FIELD", "DUPLICATE_CHECK_NAME_FIELD",
+                "DUPLICATE_FLAG_FIELD", "DUPLICATE_REASON_FIELD"
+            ] %}
+            <div class="form-group">
+                <label>{{ field.replace("_", " ").title() }}:</label>
+                <input type="text" name="{{ field }}" value="{{ config[field] }}">
+            </div>
+            {% endfor %}
+        </div>
+    </details>
+
+    <!-- Payment Deduplication -->
+    <details>
+        <summary>Payment Deduplication Fields</summary>
+        <div class="form-section">
+            {% for field in ["NATIONAL_ID_FIELD", "PROJECT_TYPE_FIELD"] %}
+            <div class="form-group">
+                <label>{{ field.replace("_", " ").title() }}:</label>
+                <input type="text" name="{{ field }}" value="{{ config[field] }}">
+            </div>
+            {% endfor %}
+        </div>
+    </details>
+
+    <!-- Child Deduplication -->
+    <details>
+        <summary>Child Deduplication Fields</summary>
+        <div class="form-section">
+            {% for field in [
+                "CHILD_DOB_FIELD", "CHILD_AGE_FIELD", "CHILD_DEDUPLICATION_FIELD", "CHILD_DUPLICATE_NAME_FIELD"
+            ] %}
+            <div class="form-group">
+                <label>{{ field.replace("_", " ").title() }}:</label>
+                <input type="text" name="{{ field }}" value="{{ config[field] }}">
+            </div>
+            {% endfor %}
+        </div>
+    </details>
+
+    <!-- Miscellaneous -->
+    <details>
+        <summary>Miscellaneous</summary>
+        <div class="form-section">
+            <div class="form-group">
+                <label>PREVIOUS_PROJECTS_FIELD:</label>
+                <input type="text" name="PREVIOUS_PROJECTS_FIELD" value="{{ config['PREVIOUS_PROJECTS_FIELD'] }}">
+            </div>
+        </div>
+    </details>
+<details>
+  <summary>Import Field Mapping</summary>
+  <div class="form-section">
+    {% for display_name, internal_name in config["IMPORT_FIELDS"].items() %}
+    <div class="form-group">
+      <label>{{ display_name }}</label>
+      <input type="text" name="IMPORT_FIELDS[{{ display_name }}]" value="{{ internal_name }}">
+    </div>
+    {% endfor %}
+  </div>
+</details>
+    <button type="submit" class="button">{{ t("Save Configuration") }}</button>
+</form>
+
+<div id="toast" class="toast">{{ t("System Configuration") }} Saved</div>
+
+<script>
+    let matchCount = {{ config['MATCHING_FIELDS']|length }};
+
+    function addRow() {
+        const table = document.getElementById('match-table').getElementsByTagName('tbody')[0];
+        const row = table.insertRow();
+        row.innerHTML = `
+            <td><input name="optional_name_${matchCount}" style="width: 100%;"></td>
+            <td><input name="beneficiary_field_${matchCount}" style="width: 100%;"></td>
+            <td><input name="project_field_${matchCount}" style="width: 100%;"></td>
+            <td><button type="button" onclick="deleteRow(this)">X</button></td>
+        `;
+        matchCount++;
+        document.getElementById('match_field_count').value = matchCount;
+    }
+
+    function deleteRow(btn) {
+        const row = btn.closest('tr');
+        row.remove();
+        updateInputs();
+    }
+
+    function updateInputs() {
+        const rows = document.querySelectorAll('#match-table tbody tr');
+        matchCount = rows.length;
+        document.getElementById('match_field_count').value = matchCount;
+        rows.forEach((row, i) => {
+            row.cells[0].querySelector('input').name = `optional_name_${i}`;
+            row.cells[1].querySelector('input').name = `beneficiary_field_${i}`;
+            row.cells[2].querySelector('input').name = `project_field_${i}`;
+        });
+    }
+
+    function changeLang(select) {
+        const lang = select.value;
+        const url = new URL(window.location.href);
+        url.searchParams.set('lang', lang);
+        window.location.href = url;
+    }
+
+    {% if saved == 'true' %}
+    setTimeout(() => {
+        document.getElementById('toast').classList.add('show');
+        setTimeout(() => {
+            document.getElementById('toast').classList.remove('show');
+        }, 3000);
+    }, 100);
+    {% endif %}
+</script>
+<footer style="text-align: center; margin-top: 4rem; padding: 2rem; font-size: 0.95rem; color: #666;">
+    <p>{{ t("Developed by 510 @ Netherlands Red Cross.") }}</p>
+    <p>{{ t("For any support, contact jharrison@redcross.nl.") }}</p>
+</footer>
+</body>
+</html>

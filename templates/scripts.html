@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ t("Run Scripts") }}</title>
+
+    <!-- Bootstrap to match the Import page -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+    <style>
+        body { background-color: #f4f4f4; }
+        .header {
+            background-color: #ffffff;
+            border-bottom: 2px solid #dee2e6;
+            padding: 1rem;
+            position: sticky;
+            top: 0; z-index: 1000;
+        }
+        .header img { height: 40px; margin-right: 10px; }
+        .script-card {
+            background: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: .75rem;
+            box-shadow: 0 4px 8px rgba(0,0,0,.05);
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+        }
+        .message {
+            padding: .9rem 1rem;
+            border-radius: .5rem;
+            display: flex; align-items: center; gap: .6rem;
+            font-size: 0.95rem;
+        }
+        .message .icon { font-size: 1.2rem; }
+        .message.info    { background-color: #e9f5ff; border-left: 5px solid #0d6efd; }
+        .message.success { background-color: #eafaf1; border-left: 5px solid #198754; }
+        .message.warning { background-color: #fff8e5; border-left: 5px solid #ffc107; }
+        .message.error   { background-color: #fbeaea; border-left: 5px solid #dc3545; }
+    </style>
+</head>
+<body>
+
+    <!-- Header + language selector (mirrors import page) -->
+    <div class="header d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+            <img src="/static/krcs.png" alt="KRCS">
+            <img src="/static/510.png" alt="510">
+            <h4 class="mb-0 ms-3">{{ t("Run Scripts") }}</h4>
+        </div>
+        <div>
+            <form method="GET" action="{{ url_for('scripts_page') }}" id="langForm">
+                <select name="lang" class="form-select" onchange="document.getElementById('langForm').submit()">
+                    <option value="en" {% if lang == 'en' %}selected{% endif %}>English</option>
+                    <option value="ky" {% if lang == 'ky' %}selected{% endif %}>Кыргызча</option>
+                    <option value="ru" {% if lang == 'ru' %}selected{% endif %}>Русский</option>
+                </select>
+            </form>
+        </div>
+    </div>
+
+    <div class="container mt-4">
+
+        <!-- Link to System Config (styled like a top CTA) -->
+        <div class="d-flex justify-content-end mb-3">
+            <a class="btn btn-success" href="{{ url_for('import_excel', lang=lang) }}">
+                {{ t("Import from Excel") }}
+            </a>
+        </div>
+
+        <!-- Script cards -->
+        {% for key, config in scripts.items() %}
+            <div class="script-card">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                    <div class="fw-semibold">
+                        {{ t(config.label_key) }}
+                    </div>
+                    <form method="POST" action="{{ url_for('scripts_page', lang=lang) }}" class="d-flex gap-2">
+                        <input type="hidden" name="script" value="{{ key }}">
+                        <input type="hidden" name="lang" value="{{ lang }}">
+                        <button type="submit" class="btn btn-primary">
+                            {{ t("Run") }}
+                        </button>
+                    </form>
+                </div>
+
+                {% if selected_script == key and result %}
+                    <div class="mt-3">
+                        {% for line in result.split('\n') %}
+                            {% set ln = line.strip() %}
+                            {% if ln %}
+                                {% if '❌' in ln %}
+                                    <div class="message error">
+                                        <span class="icon">❌</span> {{ ln | replace('❌', '') }}
+                                    </div>
+                                {% elif '⚠️' in ln %}
+                                    <div class="message warning">
+                                        <span class="icon">⚠️</span> {{ ln | replace('⚠️', '') }}
+                                    </div>
+                                {% elif '✅' in ln or '✔' in ln %}
+                                    <div class="message success">
+                                        <span class="icon">✅</span> {{ ln | replace('✅', '') }}
+                                    </div>
+                                {% elif '👶' in ln or '👥' in ln or '📦' in ln or '🔍' in ln %}
+                                    <div class="message info">
+                                        <span class="icon">ℹ️</span> {{ ln }}
+                                    </div>
+                                {% else %}
+                                    <div class="message info">
+                                        <span class="icon">💬</span> {{ ln }}
+                                    </div>
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+
+        <footer class="text-center mt-4 py-4" style="color:#666;">
+            <p>{{ t("Developed by 510 @ Netherlands Red Cross.") }}</p>
+            <p>{{ t("For any support, contact jharrison@redcross.nl.") }}</p>
+        </footer>
+    </div>
+
+    <!-- Bootstrap JS (for potential alerts later) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
