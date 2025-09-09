@@ -113,21 +113,24 @@
             <button type="submit" class="btn btn-success">{{ t("Import Excel") }}</button>
         </form>
             <hr />
-    <h5>{{ t("Step 3: Assign Beneficiaries to Project from Government List") }}</h5>
-    <form method="POST" action="/assign-to-project?lang={{ lang }}" enctype="multipart/form-data">
-        <input type="hidden" name="lang" value="{{ lang }}">
-        <div class="row g-3 align-items-center mb-3">
-            <div class="col-auto">
-                <label for="govListFile" class="col-form-label">{{ t("Upload Excel File") }}:</label>
-            </div>
-            <div class="col-auto">
-                <input class="form-control" type="file" name="govListFile" id="govListFile" accept=".xlsx" required>
-            </div>
-            <div class="col-auto">
-                <button type="submit" class="btn btn-warning">{{ t("Assign to Project") }}</button>
-            </div>
+<h5>{{ t("Step 3: Assign Beneficiaries to Project from Government List") }}</h5>
+<p class="text-muted">
+    {{ t("Make sure you upload an Excel file with the following columns | First Name | Last Name | Patronymic | ID Number | Region | Project Name |. The Project Name must be exactly the same as the project in Bitrix24.") }}
+</p>
+<form method="POST" action="/assign-to-project?lang={{ lang }}" enctype="multipart/form-data">
+    <input type="hidden" name="lang" value="{{ lang }}">
+    <div class="row g-3 align-items-center mb-3">
+        <div class="col-auto">
+            <label for="govListFile" class="col-form-label">{{ t("Upload Excel File") }}:</label>
         </div>
-    </form>
+        <div class="col-auto">
+            <input class="form-control" type="file" name="govListFile" id="govListFile" accept=".xlsx" required>
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-warning">{{ t("Assign to Project") }}</button>
+        </div>
+    </div>
+</form>
     </div>
  
         

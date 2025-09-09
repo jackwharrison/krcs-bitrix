@@ -51,17 +51,22 @@ translations = {
         "Deleted duplicate payment ID": "Кайталап киргизилген төлөм өчүрүлдү. ID",
         "Failed to delete payment ID": "Төлөмдү өчүрүү ишке ашкан жок. ID",
         "Done. Deleted {count} duplicates: {ids}": "Аякталды. {count} кайталоо өчүрүлдү: {ids}",
-        "Developed by 510 @ Netherlands Red Cross.": "510 тарабынан иштелип чыккан, Нидерланд Кызыл Крест уюму.",
-        "For any support, contact jharrison@redcross.nl.": "Көмөк керек болсо, jharrison@redcross.nl дарегине кайрылыңыз.",
+        "Developed by 510 @ Netherlands Red Cross. Maintained by Kyrgyzstan Red Crescent": "Разработано 510 при Нидерландском Красном Кресте. Поддерживается Красным Полумесяцем Кыргызстана.",
+        "For any support, contact sh.abdiseitov@redcrescent.kg": "Көмөк керек болсо, sh.abdiseitov@redcrescent.kg дарегине кайрылыңыз.",
         "Go to System Configuration": "Системанын жөндөөлөрүнө өтүү",
         "Run Scripts": "Скрипттерди иштетүү",
         "Import from Excel": "Excel файлынан импорттоо",
         "Step 1: Download Template": "1-кадам: Шаблонду жүктөп алуу",
-        "Step 2: Import Excel File": "2-кадам: Excel файлды импорттоо",
+        "Step 2: Import Excel File": "2-кадам: Excel файлды импорттоо",        
+        "Step 3: Assign Beneficiaries to Project from Government List": "3-кадам: Бенефициарларды мамлекеттик тизмеден долбоорго дайындоо",
         "Select Entity": "Субъектини тандаңыз",
         "Download Template": "Шаблонду жүктөө",
         "Import Excel": "Excel импорттоо",
-        "All rights reserved.": "Бардык укуктар корголгон."       
+        "Upload Excel File": "Excel файлын жүктөө",
+        "Assign to Project": "Долбоорго дайындоо",
+        "All rights reserved.": "Бардык укуктар корголгон.",
+        "Successfully imported {len(results)} records.": "Успешно импортировано {len(results)} записей.",
+        "Make sure you upload an Excel file with the following columns | First Name | Last Name | Patronymic | ID Number | Region | Project Name |. The Project Name must be exactly the same as the project in Bitrix24.": "Excel файлын төмөнкү колонкалар менен жүктөгөнүңүзгө ынаныңыз | Аты | Фамилиясы | Атасынын аты | Жеке ID номери | Регион | Долбоордун аталышы |. Долбоордун аталышы Bitrix24төгү долбоор менен так бирдей болушу керек."       
     },
     'ru': {
         "System Configuration": "Системная конфигурация",
@@ -94,17 +99,22 @@ translations = {
         "Deleted duplicate payment ID": "Удалён дублирующийся платёж ID",
         "Failed to delete payment ID": "Не удалось удалить платёж ID",
         "Done. Deleted {count} duplicates: {ids}": "Готово. Удалено {count} дубликатов: {ids}",
-        "Developed by 510 @ Netherlands Red Cross.": "Разработано 510 при Нидерландском Красном Кресте.",
-        "For any support, contact jharrison@redcross.nl.": "По вопросам поддержки обращайтесь: jharrison@redcross.nl.",
+        "Developed by 510 @ Netherlands Red Cross. Maintained by Kyrgyzstan Red Crescent": "Разработано 510 при Нидерландском Красном Кресте. Поддерживается Красным Полумесяцем Кыргызстана.",
+        "For any support, contact sh.abdiseitov@redcrescent.kg": "По вопросам поддержки обращайтесь: sh.abdiseitov@redcrescent.kg",
         "Go to System Configuration": "Перейти к настройкам системы",
         "Run Scripts": "Запустить скрипты",
         "Import from Excel": "Импорт из Excel",
         "Step 1: Download Template": "Шаг 1: Скачать шаблон",
         "Step 2: Import Excel File": "Шаг 2: Импортировать Excel файл",
+        "Step 3: Assign Beneficiaries to Project from Government List": "Шаг 3: Назначить бенефициаров на проект из государственного списка",
         "Select Entity": "Выберите сущность",
         "Download Template": "Скачать шаблон",
         "Import Excel": "Импорт Excel",
-        "All rights reserved.": "Все права защищены."              
+        "Upload Excel File": "Загрузить Excel файл",
+        "Assign to Project": "Назначить на проект",
+        "All rights reserved.": "Все права защищены.",
+        "Successfully imported {len(results)} records.": "{len(results)} жазуу ийгиликтүү импорттолду.",
+        "Make sure you upload an Excel file with the following columns | First Name | Last Name | Patronymic | ID Number | Region | Project Name |. The Project Name must be exactly the same as the project in Bitrix24.": "Убедитесь, что вы загружаете Excel-файл со следующими колонками | Имя | Фамилия | Отчество | Номер удостоверения личности | Регион | Название проекта |. Название проекта должно в точности совпадать с проектом в Bitrix24."             
     }
 }
 
