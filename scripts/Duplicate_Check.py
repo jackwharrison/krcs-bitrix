@@ -1,4 +1,5 @@
 import sys
+import io
 import requests
 from collections import defaultdict
 from config_loader import load_config
@@ -7,87 +8,144 @@ from config_loader import load_config
 config = load_config()
 LANGUAGE = sys.argv[1] if len(sys.argv) > 1 else config.get("LANGUAGE", "en")
 
+# Ensure UTF-8 output in terminal
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+
 # Localized strings
-STRINGS = {
-    "checking_duplicates": {
-        "en": "Checking for duplicates...",
-        "ru": "Проверка на дубликаты...",
-        "ky": "Кайталанган жазууларды текшерүү..."
+TRANSLATIONS = {
+    "ky": {
+        "🔍 Starting duplicate check...\n": "🔍 Дубликаттарды текшерүү башталды...\n",
+        "📦 {n} total beneficiaries loaded.": "📦 Жалпы {n} жаран жүктөлдү.",
+        "🎯 {n} items eligible for duplicate checking.\n": "🎯 {n} жаран дубликат текшерүүсүнө ылайыктуу.\n",
+        "🔄 Checking item {i}/{total} (ID: {id})": "🔄 Текшерилип жатат {i}/{total} (ID: {id})",
+        "✅ Updated {id} - {payload}": "✅ Жаңыртылды {id} - {payload}",
+        "❌ Failed to update {id}: {msg}": "❌ Жаңыртуу ишке ашкан жок {id}: {msg}",
+        "\n✅ Duplicate check complete. All matching records updated.\n": "\n✅ Текшерүү аяктады. Бардык дал келген жазуулар жаңыртылды.\n"
     },
-    "duplicate_group": {
-        "en": "Duplicate group detected:",
-        "ru": "Обнаружена группа дубликатов:",
-        "ky": "Кайталанган жазуулар тобу табылды:"
-    },
-    "done": {
-        "en": "Duplicate check completed.",
-        "ru": "Проверка на дубликаты завершена.",
-        "ky": "Кайталанган жазууларды текшерүү аяктады."
+    "ru": {
+        "🔍 Starting duplicate check...\n": "🔍 Начата проверка на дубликаты...\n",
+        "📦 {n} total beneficiaries loaded.": "📦 Всего загружено {n} бенефициаров.",
+        "🎯 {n} items eligible for duplicate checking.\n": "🎯 {n} записей подлежат проверке на дубликаты.\n",
+        "🔄 Checking item {i}/{total} (ID: {id})": "🔄 Проверяется {i}/{total} (ID: {id})",
+        "✅ Updated {id} - {payload}": "✅ Обновлено {id} - {payload}",
+        "❌ Failed to update {id}: {msg}": "❌ Ошибка обновления {id}: {msg}",
+        "\n✅ Duplicate check complete. All matching records updated.\n": "\n✅ Проверка завершена. Все совпадающие записи обновлены.\n"
     }
 }
 
-def t(key):
-    return STRINGS[key].get(LANGUAGE, STRINGS[key]["en"])
+def t(key, **kwargs):
+    """Simple translation function."""
+    return TRANSLATIONS.get(LANGUAGE, {}).get(key, key).format(**kwargs)
 
-print(t("checking_duplicates"))
-
-# Config values
-URL = config["B24_WEBHOOK_URL"]
-ENTITY_TYPE_ID = config["BENEFICIARY_ENTITY_TYPE_ID"]
-STAGE_ID = config["REGISTRATION_STAGE_ID"]
-NID_FIELD = config["DUPLICATE_CHECK_NATIONAL_ID_FIELD"]
-NAME_FIELD = config["DUPLICATE_CHECK_NAME_FIELD"]
-
-# Get all items
-def fetch_all_items():
+def fetch_all_beneficiaries():
     all_items = []
     start = 0
     while True:
-        res = requests.post(URL + "/crm.item.list", json={
-            "entityTypeId": ENTITY_TYPE_ID,
-            "filter": {"stageId": STAGE_ID},
-            "start": start
-        })
-        res.raise_for_status()
-        data = res.json()
-        all_items.extend(data["result"]["items"])
-        if "next" not in data["result"]:
+        response = requests.get(
+            f"{config['B24_WEBHOOK_URL']}/crm.item.list",
+            params={
+                "entityTypeId": config['BENEFICIARY_ENTITY_TYPE_ID'],
+                "start": start
+            }
+        ).json()
+        items = response.get("result", {}).get("items", [])
+        all_items.extend(items)
+        if "next" not in response.get("result", {}):
             break
-        start = data["result"]["next"]
+        start = response["result"]["next"]
     return all_items
 
-items = fetch_all_items()
+def update_beneficiary(item_id, payload):
+    res = requests.post(
+        f"{config['B24_WEBHOOK_URL']}/crm.item.update",
+        params={
+            "entityTypeId": config['BENEFICIARY_ENTITY_TYPE_ID'],
+            "id": item_id,
+        },
+        json={"fields": payload}
+    )
+    if res.ok:
+        print(t("✅ Updated {id} - {payload}", id=item_id, payload=payload))
+    else:
+        print(t("❌ Failed to update {id}: {msg}", id=item_id, msg=res.text))
 
-# Build lookup maps
-by_nid = defaultdict(list)
-by_name = defaultdict(list)
+def is_duplicate(item, all_items):
+    national_id = item.get(config['DUPLICATE_CHECK_NATIONAL_ID_FIELD'])
+    name = item.get(config['DUPLICATE_CHECK_NAME_FIELD'])
+    reasons = []
+    for other in all_items:
+        if other["id"] == item["id"]:
+            continue
+        if other.get("stageId") != config['REGISTRATION_STAGE_ID']:
+            continue
+        if national_id and national_id == other.get(config['DUPLICATE_CHECK_NATIONAL_ID_FIELD']):
+            reasons.append("Duplicate National ID")
+        other_name = str(other.get(config['DUPLICATE_CHECK_NAME_FIELD'], "")).strip().lower()
+        if name and name.strip().lower() == other_name:
+            reasons.append("Duplicate Name")
+    return ", ".join(set(reasons)) if reasons else None
 
-for item in items:
-    nid = (item.get("fields", {}).get(NID_FIELD) or "").strip()
-    name = (item.get("fields", {}).get(NAME_FIELD) or "").strip().lower()
-    if nid:
-        by_nid[nid].append(item["id"])
-    if name:
-        by_name[name].append(item["id"])
+def build_merge_url(ids):
+    base = config["B24_WEBHOOK_URL"].split("/rest/")[0]
+    entity_type_id = config["BENEFICIARY_ENTITY_TYPE_ID"]
+    context = config.get("MERGE_CONTEXT_ID", f"KANBAN_V11_DYNAMIC_{entity_type_id}_JRJ7Q8")
+    id_params = "".join([f"&id[]={i}" for i in sorted(ids)])
+    return f"{base}/crm/type/{entity_type_id}/merge/?externalContextId={context}{id_params}"
 
-# Collect duplicate sets (as frozensets to deduplicate groups)
-dup_sets = set()
+def main():
+    print(t("🔍 Starting duplicate check...\n"))
+    all_items = fetch_all_beneficiaries()
+    candidates = [
+        item for item in all_items
+        if item.get("stageId") == config['REGISTRATION_STAGE_ID'] and not item.get(config['DUPLICATE_FLAG_FIELD'])
+    ]
+    print(t("📦 {n} total beneficiaries loaded.", n=len(all_items)))
+    print(t("🎯 {n} items eligible for duplicate checking.\n", n=len(candidates)))
 
-for ids in by_nid.values():
-    if len(ids) > 1:
-        dup_sets.add(frozenset(ids))
-for ids in by_name.values():
-    if len(ids) > 1:
-        dup_sets.add(frozenset(ids))
+    # Track duplicates for merging
+    nid_groups = defaultdict(list)
+    name_groups = defaultdict(list)
 
-# Print merge URLs
-BASE_URL = config["B24_WEBHOOK_URL"].split("/rest/")[0]
-CONTEXT = config.get("MERGE_CONTEXT_ID", f"KANBAN_V11_DYNAMIC_{ENTITY_TYPE_ID}_JRJ7Q8")
+    for item in all_items:
+        if item.get("stageId") != config['REGISTRATION_STAGE_ID']:
+            continue
+        nid = item.get(config['DUPLICATE_CHECK_NATIONAL_ID_FIELD'])
+        name = str(item.get(config['DUPLICATE_CHECK_NAME_FIELD'], "")).strip().lower()
+        if nid:
+            nid_groups[nid].append(item["id"])
+        if name:
+            name_groups[name].append(item["id"])
 
-for group in dup_sets:
-    id_params = "".join([f"&id[]={i}" for i in sorted(group)])
-    merge_url = f"{BASE_URL}/crm/type/{ENTITY_TYPE_ID}/merge/?externalContextId={CONTEXT}{id_params}"
-    print(f"\n{t('duplicate_group')}")
-    print(f"🔗 {merge_url}")
+    printed_groups = set()
 
-print("\n" + t("done"))
+    for i, item in enumerate(candidates, 1):
+        print(t("🔄 Checking item {i}/{total} (ID: {id})", i=i, total=len(candidates), id=item['id']))
+        reason = is_duplicate(item, all_items)
+        payload = {
+            config['DUPLICATE_FLAG_FIELD']: (
+                config['DUPLICATE_FLAG_ENUM']["duplicate"] if reason else config['DUPLICATE_FLAG_ENUM']["unique"]
+            ),
+            config['DUPLICATE_REASON_FIELD']: reason or ""
+        }
+        update_beneficiary(item["id"], payload)
+
+        # Print merge URL if duplicate
+        if reason:
+            nid = item.get(config['DUPLICATE_CHECK_NATIONAL_ID_FIELD'])
+            name = str(item.get(config['DUPLICATE_CHECK_NAME_FIELD'], "")).strip().lower()
+            ids = []
+            if nid and len(nid_groups[nid]) > 1:
+                ids = nid_groups[nid]
+            elif name and len(name_groups[name]) > 1:
+                ids = name_groups[name]
+            if ids:
+                group = frozenset(ids)
+                if group not in printed_groups:
+                    printed_groups.add(group)
+                    url = build_merge_url(ids)
+                    print(f"🔗 {url}")
+
+    print(t("\n✅ Duplicate check complete. All matching records updated.\n"))
+
+if __name__ == "__main__":
+    main()
