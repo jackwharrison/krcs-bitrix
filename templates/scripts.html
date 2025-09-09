@@ -101,9 +101,10 @@
                                     <div class="message success">
                                         <span class="icon">✅</span> {{ ln | replace('✅', '') }}
                                     </div>
-                                {% elif '👶' in ln or '👥' in ln or '📦' in ln or '🔍' in ln %}
-                                    <div class="message info">
-                                        <span class="icon">ℹ️</span> {{ ln }}
+                                {% elif ln.startswith('🔗') %}
+                                    <div class="message success">
+                                        <span class="icon">🔗</span>
+                                        <a href="{{ ln[2:] }}" target="_blank">{{ ln[2:] }}</a>
                                     </div>
                                 {% else %}
                                     <div class="message info">

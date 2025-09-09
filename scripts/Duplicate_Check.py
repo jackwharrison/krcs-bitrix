@@ -87,6 +87,7 @@ CONTEXT = config.get("MERGE_CONTEXT_ID", f"KANBAN_V11_DYNAMIC_{ENTITY_TYPE_ID}_J
 for group in dup_sets:
     id_params = "".join([f"&id[]={i}" for i in sorted(group)])
     merge_url = f"{BASE_URL}/crm/type/{ENTITY_TYPE_ID}/merge/?externalContextId={CONTEXT}{id_params}"
-    print(f"\n{t('duplicate_group')}\n{merge_url}")
+    print(f"\n{t('duplicate_group')}")
+    print(f"🔗 {merge_url}")
 
 print("\n" + t("done"))
