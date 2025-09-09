@@ -5,7 +5,8 @@ import pathlib
 # Optional: set this in Render to redirect config file to persistent disk
 CONFIG_DIR = os.getenv("CONFIG_DIR", ".")
 CONFIG_PATH = os.path.join(CONFIG_DIR, "system_config.json")
-DEFAULT_PATH = os.path.join(os.path.dirname(__file__), "system_config.default.json")
+DEFAULT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "system_config.default.json"))
+
 
 def load_config():
     if not os.path.exists(CONFIG_PATH):

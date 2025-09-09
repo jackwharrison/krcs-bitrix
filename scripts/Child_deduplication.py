@@ -8,9 +8,10 @@ from collections import defaultdict
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 # Load config from system_config.json
-with open(os.path.join(os.path.dirname(__file__), '..', 'system_config.json'), encoding='utf-8') as f:
-    config = json.load(f)
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from config_loader import load_config
 
+config = load_config()
 # Dynamic parent field
 PARENT_FIELD = f"parentId{config['BENEFICIARY_ENTITY_TYPE_ID']}"
 
