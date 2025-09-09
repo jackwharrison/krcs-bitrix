@@ -1,8 +1,12 @@
 import requests
-from config_loader import config  # Load config from system_config.json
 import time
 import io
 import sys
+import os
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from config_loader import load_config
+config = load_config()
 
 # Ensure UTF-8 output (important on Windows)
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')

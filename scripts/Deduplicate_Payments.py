@@ -2,7 +2,11 @@ import requests
 import sys
 import io
 import time
-from config_loader import config
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from config_loader import load_config
+
+config = load_config()
 
 # Force UTF-8 output
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')

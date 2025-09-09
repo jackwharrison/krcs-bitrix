@@ -1,8 +1,11 @@
 import requests
-from config_loader import config
-import io
+import os
 import sys
+import io
 
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from config_loader import load_config
+config = load_config()
 # Ensure console prints in UTF-8 (especially for Windows)
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 

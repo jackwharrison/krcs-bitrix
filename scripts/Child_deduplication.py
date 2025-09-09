@@ -155,7 +155,8 @@ def main():
         if not ben:
             continue
 
-        if ben.get("stageId") != config["VERIFIED_STAGE_ID"]:
+        if ben.get("stageId") == config["REGISTRATION_STAGE_ID"]:
+            print_message("ℹ️", "{name} is still in registration stage, skipping...", name=ben.get("title", f"{ben_id}"))
             continue
 
         other_names = [

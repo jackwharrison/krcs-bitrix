@@ -8,9 +8,10 @@ import os
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 # Load config from system_config.json
-with open(os.path.join(os.path.dirname(__file__), '..', 'system_config.json'), encoding='utf-8') as f:
-    config = json.load(f)
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from config_loader import load_config
 
+config = load_config()
 # ---- Language + translations ----
 # Read language from argv (fallback to English)
 lang = sys.argv[1] if len(sys.argv) > 1 else 'en'
