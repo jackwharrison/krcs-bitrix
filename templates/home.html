@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ t("Home") }}</title>
+
+  <!-- Bootstrap (same as other pages) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+  <style>
+    body { background-color: #f4f4f4; }
+    .header {
+      background-color: #ffffff;
+      border-bottom: 2px solid #dee2e6;
+      padding: 1rem;
+      position: sticky; top: 0; z-index: 1000;
+    }
+    .header img { height: 40px; margin-right: 10px; }
+    .hero {
+      background: #fff;
+      border: 1px solid #dee2e6;
+      border-radius: .75rem;
+      box-shadow: 0 4px 8px rgba(0,0,0,.05);
+      padding: 2rem;
+      text-align: center;
+    }
+    .cta-buttons .btn {
+      min-width: 240px;
+      padding: .9rem 1.2rem;
+      font-size: 1.05rem;
+      border-radius: .6rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header (mirrors other pages) -->
+  <div class="header d-flex justify-content-between align-items-center">
+    <div class="d-flex align-items-center">
+      <img src="/static/krcs.png" alt="KRCS">
+      <h4 class="mb-0 ms-3">{{ t("Home") }}</h4>
+    </div>
+    <div>
+      <form method="GET" action="{{ url_for('home') }}" id="langForm">
+        <select name="lang" class="form-select" onchange="document.getElementById('langForm').submit()">
+          <option value="en" {% if lang == 'en' %}selected{% endif %}>English</option>
+          <option value="ky" {% if lang == 'ky' %}selected{% endif %}>Кыргызча</option>
+          <option value="ru" {% if lang == 'ru' %}selected{% endif %}>Русский</option>
+        </select>
+      </form>
+    </div>
+  </div>
+
+  <div class="container mt-5">
+    <div class="hero">
+      <h3 class="mb-3">{{ t("Welcome") }}</h3>
+      <p class="text-muted mb-4">
+        {{ t("Choose an action below.") }}
+      </p>
+
+      <div class="d-flex flex-column flex-sm-row justify-content-center gap-3 cta-buttons">
+        <a class="btn btn-primary" href="{{ url_for('scripts_page', lang=lang) }}">
+          {{ t("Go to Scripts") }}
+        </a>
+        <a class="btn btn-success" href="{{ url_for('import_excel', lang=lang) }}">
+          {{ t("Go to Excel Import") }}
+        </a>
+      </div>
+    </div>
+
+    <!-- Footer (mirrors other pages) -->
+    <footer class="text-center mt-4 py-4" style="color:#666;">
+      <p>{{ t("Developed by 510 @ Netherlands Red Cross. Maintained by Kyrgyzstan Red Crescent") }}</p>
+      <p>{{ t("For any support, contact sh.abdiseitov@redcrescent.kg") }}</p>
+    </footer>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

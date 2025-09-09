@@ -68,7 +68,12 @@ translations = {
         "Make sure you upload an Excel file with the following columns:": "Excel файлын төмөнкү колонкалар менен жүктөгөнүңүзгө ынаныңыз:",
         "| First Name | Last Name | Patronymic | ID Number | Region | Project Name |": "| Аты | Фамилиясы | Атасынын аты | Жеке ID номери | Регион | Долбоордун аталышы |",
         "The Project Name must be exactly the same as the project in Bitrix24.": "Долбоордун аталышы Bitrix24төгү долбоор менен так бирдей болушу керек.",
-        "Successfully imported {n} records.": "{n} жазуу ийгиликтүү импорттолду."
+        "Successfully imported {n} records.": "{n} жазуу ийгиликтүү импорттолду.",
+        "Home": "Башкы бет",
+        "Welcome": "Кош келиңиз",
+        "Choose an action below.": "Төмөндөн аракетти тандаңыз.",
+        "Go to Scripts": "Скрипттерге өтүү",
+        "Go to Excel Import": "Excel импортко өтүү"
     },
     'ru': {
         "System Configuration": "Системная конфигурация",
@@ -118,7 +123,12 @@ translations = {
         "Make sure you upload an Excel file with the following columns:": "Убедитесь, что вы загружаете Excel-файл со следующими колонками:",
         "| First Name | Last Name | Patronymic | ID Number | Region | Project Name |": "| Имя | Фамилия | Отчество | Номер удостоверения личности | Регион | Название проекта |",
         "The Project Name must be exactly the same as the project in Bitrix24.": "Название проекта должно в точности совпадать с проектом в Bitrix24.",
-        "Successfully imported {n} records.": "Успешно импортировано {n} записей."
+        "Successfully imported {n} records.": "Успешно импортировано {n} записей.",
+        "Home": "Главная",
+        "Welcome": "Добро пожаловать",
+        "Choose an action below.": "Выберите действие ниже.",
+        "Go to Scripts": "Перейти к скриптам",
+        "Go to Excel Import": "Перейти к импорту из Excel"
         }
 }
 
@@ -148,6 +158,19 @@ SCRIPT_CONFIG = {
         "label_key": "Reset Beneficiaries"
     }
 }
+
+
+@app.route("/", methods=["GET"])
+def home():
+    lang = request.args.get("lang", "en")
+
+    # Your existing translate function
+    t = lambda key: translate(key, lang)
+
+    # Render the home page template
+    return render_template("home.html", t=t, lang=lang)
+
+
 
 @app.route('/system-config', methods=['GET', 'POST'])
 def system_config():
