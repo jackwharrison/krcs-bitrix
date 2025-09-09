@@ -22,7 +22,16 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             z-index: 100;
         }
-
+        .info-box {
+            margin: 10px auto 20px auto;
+            max-width: 900px;
+            padding: 12px 18px;
+            background-color: #ffc400;
+            border: 1px solid #b3d7ff;
+            border-radius: 6px;
+            color: #0c5460;
+            font-size: 2rem;
+        }
         .header img {
             height: 50px;
         }
@@ -193,7 +202,6 @@
     <img src="{{ url_for('static', filename='krcs.png') }}">
     <h1>{{ t("System Configuration") }}</h1>
     <div>
-        <a href="/scripts" class="scripts-button">{{ t("Go to Scripts Page") }}</a>
         <select class="lang-select" onchange="changeLang(this)">
             <option value="en" {% if lang == 'en' %}selected{% endif %}>English</option>
             <option value="ky" {% if lang == 'ky' %}selected{% endif %}>Кыргызча</option>
@@ -203,20 +211,87 @@
 </div>
 
 <form method="POST">
+    <!-- Entity IDs Section -->
+
+        <div class="info-box">
+        {{ t("Field IDs begin with ufCrm..., not UF_CRM_...") }}
+    </div>
+<details open>
+    <summary>{{ t("Entity Type IDs") }}</summary>
+
+    <div class="p-3 mb-3 rounded" style="background-color: #e8f4fb; border: 1px solid #b6e0fe; color: #055160; font-size: 0.9rem;">
+        {{ t("Entity Type IDs are 4 digits long and can be found in the URL - /crm/type/XXXX") }}
+    </div>
+
+    <div class="form-section">
+        {% for field in [
+            "PROJECT_ENTITY_TYPE_ID", "BENEFICIARY_ENTITY_TYPE_ID",
+            "PAYMENT_ENTITY_TYPE_ID", "CHILD_ENTITY_TYPE_ID"
+        ] %}
+        <div class="form-group">
+            <label>{{ field.replace("_", " ").title() }}:</label>
+            <input type="text" name="{{ field }}" value="{{ config[field] }}">
+        </div>
+        {% endfor %}
+    </div>
+</details>
 
 
+
+  
+    <!-- Beneficiary Stage IDs -->
+<details>
+    <summary>{{ t("Beneficiary Stage IDs") }}</summary>
+
+    <div class="p-3 mb-3 rounded" style="background-color: #e8f4fb; border: 1px solid #b6e0fe; color: #055160; font-size: 0.9rem;">
+        {{ t("Stage IDs for Beneficiary Entity, you can find this by clicking inspect on the columns") }}
+    </div>
+
+    <div class="form-section">
+        {% for field in [
+            "REGISTRATION_STAGE_ID", "VERIFIED_STAGE_ID", "ELIGIBLE_STAGE_ID", "COMPLETED_STAGE_ID"
+        ] %}
+        <div class="form-group">
+            <label>{{ field.replace("_", " ").title() }}:</label>
+            <input type="text" name="{{ field }}" value="{{ config[field] }}">
+        </div>
+        {% endfor %}
+    </div>
+</details>
+
+
+    <!-- Project Stage ID -->
+<details>
+    <summary>{{ t("Project Stage IDs") }}</summary>
+
+    <div class="p-3 mb-3 rounded" style="background-color: #e8f4fb; border: 1px solid #b6e0fe; color: #055160; font-size: 0.9rem;">
+        {{ t("Stage IDs for Project Entity, you can find this by clicking inspect on the columns") }}
+    </div>
+
+    <div class="form-section">
+        <div class="form-group">
+            <label>STAGE_ID:</label>
+            <input type="text" name="STAGE_ID" value="{{ config['STAGE_ID'] }}">
+        </div>
+    </div>
+</details>
 
     <!-- Matching Fields Section -->
     <details open>
         <summary>{{ t("Matching fields") }}</summary>
+
+            <div class="p-3 mb-3 rounded" style="background-color: #e8f4fb; border: 1px solid #b6e0fe; color: #055160; font-size: 0.9rem;">
+        {{ t("For matching eligibility criteria between beneficiaries and projects") }}
+            </div>
+
         <div class="form-section">
             <table id="match-table">
                 <thead>
                     <tr>
-                        <th>{{ t("Optional name") }}</th>
-                        <th>{{ t("Beneficiary field") }}</th>
-                        <th>{{ t("Project field") }}</th>
-                        <th>Delete</th>
+                        <th>{{ t("Field Name") }}</th>
+                        <th>{{ t("Beneficiary field ID") }}</th>
+                        <th>{{ t("Project field ID") }}</th>
+                        <th>{{ t("Delete") }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -235,25 +310,15 @@
         </div>
     </details>
 
-    <!-- Entity IDs Section -->
-    <details open>
-        <summary>Entity Type IDs</summary>
-        <div class="form-section">
-            {% for field in [
-                "PROJECT_ENTITY_TYPE_ID", "BENEFICIARY_ENTITY_TYPE_ID",
-                "PAYMENT_ENTITY_TYPE_ID", "CHILD_ENTITY_TYPE_ID"
-            ] %}
-            <div class="form-group">
-                <label>{{ field.replace("_", " ").title() }}:</label>
-                <input type="text" name="{{ field }}" value="{{ config[field] }}">
-            </div>
-            {% endfor %}
-        </div>
-    </details>
 
     <!-- Eligibility Posting Section -->
     <details>
-        <summary>Eligibility Posting Fields</summary>
+        <summary>{{ t("Eligibility Fields") }}</summary>
+
+                    <div class="p-3 mb-3 rounded" style="background-color: #e8f4fb; border: 1px solid #b6e0fe; color: #055160; font-size: 0.9rem;">
+        {{ t("Fields for marking project eligibility") }}
+                    </div>
+
         <div class="form-section">
             {% for field in [
                 "ELIGIBILITY_FIELD_ID", "PROGRAM_COUNT_FIELD_ID", "PROGRAM_NAMES_FIELD_ID"
@@ -266,35 +331,18 @@
         </div>
     </details>
 
-    <!-- Beneficiary Stage IDs -->
-    <details>
-        <summary>Beneficiary Stage IDs</summary>
-        <div class="form-section">
-            {% for field in [
-                "REGISTRATION_STAGE_ID", "VERIFIED_STAGE_ID", "ELIGIBLE_STAGE_ID", "COMPLETED_STAGE_ID"
-            ] %}
-            <div class="form-group">
-                <label>{{ field.replace("_", " ").title() }}:</label>
-                <input type="text" name="{{ field }}" value="{{ config[field] }}">
-            </div>
-            {% endfor %}
-        </div>
-    </details>
+ 
 
-    <!-- Project Stage ID -->
-    <details>
-        <summary>Project Stage ID</summary>
-        <div class="form-section">
-            <div class="form-group">
-                <label>STAGE_ID:</label>
-                <input type="text" name="STAGE_ID" value="{{ config['STAGE_ID'] }}">
-            </div>
-        </div>
-    </details>
+
 
     <!-- Duplicate Check -->
     <details>
-        <summary>Duplicate Check Fields</summary>
+        <summary>{{ t("Deduplication - Beneficiaries") }}</summary>
+
+                            <div class="p-3 mb-3 rounded" style="background-color: #e8f4fb; border: 1px solid #b6e0fe; color: #055160; font-size: 0.9rem;">
+        {{ t("Fields for deduplicating beneficiaries - deduplication is done on full name and ID number") }}
+                            </div>
+
         <div class="form-section">
             {% for field in [
                 "DUPLICATE_CHECK_NATIONAL_ID_FIELD", "DUPLICATE_CHECK_NAME_FIELD",
@@ -310,7 +358,11 @@
 
     <!-- Payment Deduplication -->
     <details>
-        <summary>Payment Deduplication Fields</summary>
+        <summary>{{ t("Deduplication - Payments") }}</summary>
+
+                                    <div class="p-3 mb-3 rounded" style="background-color: #e8f4fb; border: 1px solid #b6e0fe; color: #055160; font-size: 0.9rem;">
+        {{ t("Fields for deduplicating payments - deduplication is done on beneficiaries' full name and project name") }}
+                                    </div>
         <div class="form-section">
             {% for field in ["NATIONAL_ID_FIELD", "PROJECT_TYPE_FIELD"] %}
             <div class="form-group">
@@ -323,7 +375,11 @@
 
     <!-- Child Deduplication -->
     <details>
-        <summary>Child Deduplication Fields</summary>
+        <summary>{{ t("Deduplication - Children") }}</summary>
+
+                                    <div class="p-3 mb-3 rounded" style="background-color: #e8f4fb; border: 1px solid #b6e0fe; color: #055160; font-size: 0.9rem;">
+        {{ t("Fields for deduplicating children - deduplication is done on household composition, if beneficiaries register children with the same name and date of birth, this is flagged") }}
+                                    </div>
         <div class="form-section">
             {% for field in [
                 "CHILD_DOB_FIELD", "CHILD_AGE_FIELD", "CHILD_DEDUPLICATION_FIELD", "CHILD_DUPLICATE_NAME_FIELD"
@@ -338,7 +394,12 @@
 
     <!-- Miscellaneous -->
     <details>
-        <summary>Miscellaneous</summary>
+        <summary>{{ t("Previous Projects") }}</summary>
+
+                                            <div class="p-3 mb-3 rounded" style="background-color: #e8f4fb; border: 1px solid #b6e0fe; color: #055160; font-size: 0.9rem;">
+        {{ t("Field for storing information about previous projects") }}
+                                    </div>
+
         <div class="form-section">
             <div class="form-group">
                 <label>PREVIOUS_PROJECTS_FIELD:</label>
@@ -347,7 +408,12 @@
         </div>
     </details>
 <details>
-  <summary>Import Field Mapping</summary>
+
+  <summary>{{ t("Import Fields for Beneficiaries") }}</summary>
+
+                                              <div class="p-3 mb-3 rounded" style="background-color: #e8f4fb; border: 1px solid #b6e0fe; color: #055160; font-size: 0.9rem;">
+        {{ t("Fields for Excel import for beneficiaries") }}
+                                    </div>
   <div class="form-section">
     {% for display_name, internal_name in config["IMPORT_FIELDS"].items() %}
     <div class="form-group">
@@ -412,8 +478,8 @@
     {% endif %}
 </script>
 <footer style="text-align: center; margin-top: 4rem; padding: 2rem; font-size: 0.95rem; color: #666;">
-    <p>{{ t("Developed by 510 @ Netherlands Red Cross. Maintained by Kyrgyzstan Red Crescent") }}</p>
-    <p>{{ t("For any support, contact sh.abdiseitov@redcrescent.kg") }}</p>
+    <p>{{ t("Developed by 510 @ Netherlands Red Cross.") }}</p>
+    <p>{{ t("For any support, contact jharrison@redcross.nl.") }}</p>
 </footer>
 </body>
 </html>
