@@ -35,7 +35,6 @@
     <div class="header d-flex justify-content-between align-items-center">
         <div class="d-flex align-items-center">
             <img src="/static/krcs.png" alt="KRCS">
-            <img src="/static/510.png" alt="Red Cross Logo">
             <h4 class="mb-0 ms-3">{{ t("Import from Excel") }}</h4>
         </div>
         <div>
@@ -129,28 +128,13 @@
             </div>
         </div>
     </form>
-    <hr />
-    <h5>{{ t("Step 4: Generate FSP Report") }}</h5>
-    <form method="POST" action="/generate-fsp-report?lang={{ lang }}">
-        <div class="row g-3 align-items-center mb-3">
-            <div class="col-auto">
-                <label for="projectName" class="col-form-label">{{ t("Target Project Name") }}:</label>
-            </div>
-            <div class="col-auto">
-                <input type="text" class="form-control" id="projectName" name="project_name" required>
-            </div>
-            <div class="col-auto">
-                <button type="submit" class="btn btn-primary">{{ t("Generate Report") }}</button>
-            </div>
-        </div>
-    </form>
     </div>
  
         
 
 <footer style="text-align: center; margin-top: 4rem; padding: 2rem; font-size: 0.95rem; color: #666;">
-    <p>{{ t("Developed by 510 @ Netherlands Red Cross.") }}</p>
-    <p>{{ t("For any support, contact jharrison@redcross.nl.") }}</p>
+    <p>{{ t("Developed by 510 @ Netherlands Red Cross. Maintained by Kyrgyzstan Red Crescent") }}</p>
+    <p>{{ t("For any support, contact sh.abdiseitov@redcrescent.kg") }}</p>
 </footer>
 
 
