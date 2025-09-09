@@ -65,8 +65,10 @@ translations = {
         "Upload Excel File": "Excel файлын жүктөө",
         "Assign to Project": "Долбоорго дайындоо",
         "All rights reserved.": "Бардык укуктар корголгон.",
-        "Successfully imported {len(results)} records.": "Успешно импортировано {len(results)} записей.",
-        "Make sure you upload an Excel file with the following columns | First Name | Last Name | Patronymic | ID Number | Region | Project Name |. The Project Name must be exactly the same as the project in Bitrix24.": "Excel файлын төмөнкү колонкалар менен жүктөгөнүңүзгө ынаныңыз | Аты | Фамилиясы | Атасынын аты | Жеке ID номери | Регион | Долбоордун аталышы |. Долбоордун аталышы Bitrix24төгү долбоор менен так бирдей болушу керек."       
+        "Make sure you upload an Excel file with the following columns:": "Excel файлын төмөнкү колонкалар менен жүктөгөнүңүзгө ынаныңыз:",
+        "| First Name | Last Name | Patronymic | ID Number | Region | Project Name |": "| Аты | Фамилиясы | Атасынын аты | Жеке ID номери | Регион | Долбоордун аталышы |",
+        "The Project Name must be exactly the same as the project in Bitrix24.": "Долбоордун аталышы Bitrix24төгү долбоор менен так бирдей болушу керек.",
+        "Successfully imported {n} records.": "{n} жазуу ийгиликтүү импорттолду."
     },
     'ru': {
         "System Configuration": "Системная конфигурация",
@@ -113,9 +115,11 @@ translations = {
         "Upload Excel File": "Загрузить Excel файл",
         "Assign to Project": "Назначить на проект",
         "All rights reserved.": "Все права защищены.",
-        "Successfully imported {len(results)} records.": "{len(results)} жазуу ийгиликтүү импорттолду.",
-        "Make sure you upload an Excel file with the following columns | First Name | Last Name | Patronymic | ID Number | Region | Project Name |. The Project Name must be exactly the same as the project in Bitrix24.": "Убедитесь, что вы загружаете Excel-файл со следующими колонками | Имя | Фамилия | Отчество | Номер удостоверения личности | Регион | Название проекта |. Название проекта должно в точности совпадать с проектом в Bitrix24."             
-    }
+        "Make sure you upload an Excel file with the following columns:": "Убедитесь, что вы загружаете Excel-файл со следующими колонками:",
+        "| First Name | Last Name | Patronymic | ID Number | Region | Project Name |": "| Имя | Фамилия | Отчество | Номер удостоверения личности | Регион | Название проекта |",
+        "The Project Name must be exactly the same as the project in Bitrix24.": "Название проекта должно в точности совпадать с проектом в Bitrix24.",
+        "Successfully imported {n} records.": "Успешно импортировано {n} записей."
+        }
 }
 
 def translate(key, lang):
@@ -350,7 +354,7 @@ def import_excel():
                 )
                 results.append(response.json())
 
-            flash(t(f"Successfully imported {len(results)} records."), "success")
+            flash(t("Successfully imported {n} records.").format(n=len(results)), "success")
         except Exception as e:
             flash(t(f"Error: {str(e)}"), "error")
 
