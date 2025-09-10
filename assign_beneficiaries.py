@@ -1,11 +1,11 @@
-import json
 import requests
 import pandas as pd
-import os
+from config_loader import load_config
+
 
 def assign_beneficiaries_from_excel(file_path):
-    with open("system_config.json", "r", encoding="utf-8") as f:
-        config = json.load(f)
+    # Load config through config_loader so B24_WEBHOOK_URL is injected from env
+    config = load_config()
 
     WEBHOOK = config["B24_WEBHOOK_URL"]
     BENEFICIARY_ENTITY_TYPE_ID = config["BENEFICIARY_ENTITY_TYPE_ID"]
@@ -21,7 +21,7 @@ def assign_beneficiaries_from_excel(file_path):
         url = f"{WEBHOOK}/crm.item.list"
         params = {
             "entityTypeId": PROJECT_ENTITY_TYPE_ID,
-            "filter": { "title": project_name }
+            "filter": {"title": project_name}
         }
         r = requests.post(url, json=params)
         result = r.json()
@@ -70,11 +70,10 @@ def assign_beneficiaries_from_excel(file_path):
             continue
 
         full_name_parts = [first]
-        if pd.notna(patr) and patr.strip() != "":
-            full_name_parts.append(patr.strip())
+        if patr:
+            full_name_parts.append(patr)
         full_name_parts.append(last)
         full_name = " ".join(full_name_parts).strip()
-
 
         project_id = search_project_by_name(proj)
         if not project_id:
@@ -103,7 +102,6 @@ def assign_beneficiaries_from_excel(file_path):
         else:
             failures.append(f"Row {i+2}: Failed to update {full_name}")
 
-    # Return results to show on the same page
     results = {
         "successes": [f"✅ Successfully linked {success} beneficiaries."] if success else [],
         "warnings": [],
