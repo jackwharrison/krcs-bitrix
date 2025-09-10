@@ -18,7 +18,6 @@ PARENT_FIELD = f"parentId{config['BENEFICIARY_ENTITY_TYPE_ID']}"
 # Optional: set this to 'en', 'ru', or 'ky' later when integrating
 lang = sys.argv[1] if len(sys.argv) > 1 else 'en'
 
-
 # Optional translations (expand as needed)
 translations = {
     'Fetching all children...': {
@@ -36,10 +35,6 @@ translations = {
     'Found {n} potential duplicates.': {
         'ru': 'Найдено {n} возможных дубликатов.',
         'ky': '{n} мүмкүн болгон көчүрмө табылды.'
-    },
-    'Fetching all beneficiaries...': {
-        'ru': 'Загрузка всех бенефициаров...',
-        'ky': 'Бардык бенефициарларды жүктөө...'
     },
     'Duplicate household warning: {name} → matches with: {others}': {
         'ru': '⚠️ Предупреждение о дублирующемся домохозяйстве: {name} → совпадает с: {others}',
@@ -135,6 +130,14 @@ def main():
 
     print_message("⚠️", "Found {n} potential duplicates.", n=len(dup_sets))
 
+    # --- NEW: Update CHILD_DEDUPLICATION_FIELD for each beneficiary ---
+    duplicate_ids = set([pid for group in dup_sets for pid in group])
+    for parent_id in grouped_children.keys():
+        status = config["CHILD_DEDUPLICATION_ENUM"]["potential_duplicate"] if parent_id in duplicate_ids else config["CHILD_DEDUPLICATION_ENUM"]["unique"]
+        success = update_beneficiary(parent_id, {config["CHILD_DEDUPLICATION_FIELD"]: status})
+        if not success:
+            print_message("❌", "Failed to update {name}", name=parent_id)
+
     # Print merge links
     BASE_URL = config["B24_WEBHOOK_URL"].split("/rest/")[0]
     CONTEXT = config.get("MERGE_CONTEXT_ID", f"KANBAN_V11_DYNAMIC_{config['BENEFICIARY_ENTITY_TYPE_ID']}_JRJ7Q8")
@@ -149,5 +152,6 @@ def main():
         id_params = "".join([f"&id[]={i}" for i in ids])
         merge_url = f"{BASE_URL}/crm/type/{config['BENEFICIARY_ENTITY_TYPE_ID']}/merge/?externalContextId={CONTEXT}{id_params}"
         print(f"🔗 {merge_url}")
+
 if __name__ == "__main__":
     main()
