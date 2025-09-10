@@ -1,96 +1,153 @@
-import sys
 import requests
+import json
+import io
+import sys
+import os
 from collections import defaultdict
+
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+
+# Load config from system_config.json
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from config_loader import load_config
 
-# Load configuration
 config = load_config()
-LANGUAGE = sys.argv[1] if len(sys.argv) > 1 else config.get("LANGUAGE", "en")
+# Dynamic parent field
+PARENT_FIELD = f"parentId{config['BENEFICIARY_ENTITY_TYPE_ID']}"
 
-# Localized strings
-STRINGS = {
-    "checking_duplicates": {
-        "en": "Checking for duplicates...",
-        "ru": "Проверка на дубликаты...",
-        "ky": "Кайталанган жазууларды текшерүү..."
+# Optional: set this to 'en', 'ru', or 'ky' later when integrating
+lang = sys.argv[1] if len(sys.argv) > 1 else 'en'
+
+
+# Optional translations (expand as needed)
+translations = {
+    'Fetching all children...': {
+        'ru': 'Получение всех детей...',
+        'ky': 'Бардык балдарды жүктөө...'
     },
-    "duplicate_group": {
-        "en": "Duplicate group detected:",
-        "ru": "Обнаружена группа дубликатов:",
-        "ky": "Кайталанган жазуулар тобу табылды:"
+    'Found {n} beneficiaries with children.': {
+        'ru': 'Найдено {n} бенефициаров с детьми.',
+        'ky': '{n} балалу бенефициар табылды.'
     },
-    "done": {
-        "en": "Duplicate check completed.",
-        "ru": "Проверка на дубликаты завершена.",
-        "ky": "Кайталанган жазууларды текшерүү аяктады."
+    'Detecting duplicates by child name + DoB...': {
+        'ru': 'Поиск дубликатов по имени ребенка и дате рождения...',
+        'ky': 'Бала аты жана туулган датасы боюнча көчүрмөлөрдү издөө...'
+    },
+    'Found {n} potential duplicates.': {
+        'ru': 'Найдено {n} возможных дубликатов.',
+        'ky': '{n} мүмкүн болгон көчүрмө табылды.'
+    },
+    'Fetching all beneficiaries...': {
+        'ru': 'Загрузка всех бенефициаров...',
+        'ky': 'Бардык бенефициарларды жүктөө...'
+    },
+    'Duplicate household warning: {name} → matches with: {others}': {
+        'ru': '⚠️ Предупреждение о дублирующемся домохозяйстве: {name} → совпадает с: {others}',
+        'ky': '⚠️ Кайталанган үй-бүлө: {name} → окшош: {others}'
+    },
+    'Failed to update {name}': {
+        'ru': '❌ Ошибка обновления: {name}',
+        'ky': '❌ Жаңыртуу ишке ашкан жок: {name}'
     }
 }
 
-def t(key):
-    return STRINGS[key].get(LANGUAGE, STRINGS[key]["en"])
+def t(message_key, **kwargs):
+    """Translate message with fallback."""
+    template = translations.get(message_key, {}).get(lang, message_key)
+    return template.format(**kwargs)
 
-print(t("checking_duplicates"))
+def print_message(icon, message_key, **kwargs):
+    """Print with emoji icon and translated message."""
+    print(f"{icon} {t(message_key, **kwargs)}")
 
-# Config values
-URL = config["B24_WEBHOOK_URL"]
-ENTITY_TYPE_ID = config["CHILD_ENTITY_TYPE_ID"]
-STAGE_ID = config["CHILD_STAGE_ID"]
-NID_FIELD = config["CHILD_NID_FIELD"]
-NAME_FIELD = config["CHILD_NAME_FIELD"]
-PARENT_FIELD = config["CHILD_PARENT_FIELD"]
-
-# Get all child items
-def fetch_all_items():
-    all_items = []
+def fetch_all_children():
+    items = []
     start = 0
     while True:
-        res = requests.post(URL + "/crm.item.list", json={
-            "entityTypeId": ENTITY_TYPE_ID,
-            "filter": {"stageId": STAGE_ID},
-            "start": start
-        })
-        res.raise_for_status()
-        data = res.json()
-        all_items.extend(data["result"]["items"])
-        if "next" not in data["result"]:
+        res = requests.get(
+            f"{config['B24_WEBHOOK_URL']}/crm.item.list",
+            params={"entityTypeId": config["CHILD_ENTITY_TYPE_ID"], "start": start}
+        ).json()
+        batch = res.get("result", {}).get("items", [])
+        items.extend(batch)
+        if "next" not in res.get("result", {}):
             break
-        start = data["result"]["next"]
-    return all_items
+        start = res["result"]["next"]
+    return items
 
-items = fetch_all_items()
+def fetch_all_beneficiaries():
+    items = []
+    start = 0
+    while True:
+        res = requests.get(
+            f"{config['B24_WEBHOOK_URL']}/crm.item.list",
+            params={"entityTypeId": config["BENEFICIARY_ENTITY_TYPE_ID"], "start": start}
+        ).json()
+        batch = res.get("result", {}).get("items", [])
+        items.extend(batch)
+        if "next" not in res.get("result", {}):
+            break
+        start = res["result"]["next"]
+    return items
 
-# Build grouped duplicates
-dups = defaultdict(list)
+def update_beneficiary(ben_id, fields):
+    payload = {
+        "entityTypeId": config["BENEFICIARY_ENTITY_TYPE_ID"],
+        "id": ben_id,
+        "fields": fields
+    }
+    res = requests.post(f"{config['B24_WEBHOOK_URL']}/crm.item.update", json=payload)
+    return res.ok
 
-for item in items:
-    name = (item.get("fields", {}).get(NAME_FIELD) or "").strip().lower()
-    nid = (item.get("fields", {}).get(NID_FIELD) or "").strip()
-    parent = item.get("fields", {}).get(PARENT_FIELD)
-    key = (name, nid, parent)
-    if name and nid and parent:
-        dups[key].append(item["id"])
+def normalize_children(children):
+    norm = []
+    for child in children:
+        name = str(child.get("title", "")).strip().lower()
+        dob = str(child.get(config["CHILD_DOB_FIELD"], "")).strip()
+        norm.append((name, dob))
+    return sorted(norm)
 
-# Set for deduplicated sets
-dup_sets = set()
+def main():
+    print_message("👶", "Fetching all children...")
+    children = fetch_all_children()
 
-for ids in dups.values():
-    if len(ids) > 1:
-        dup_sets.add(frozenset(ids))
+    grouped_children = defaultdict(list)
+    for child in children:
+        parent_id = child.get(PARENT_FIELD)
+        if parent_id:
+            grouped_children[parent_id].append(child)
 
-# Print merge links
-BASE_URL = config["B24_WEBHOOK_URL"].split("/rest/")[0]
-CONTEXT = config.get("CHILD_MERGE_CONTEXT_ID", f"KANBAN_V11_DYNAMIC_{ENTITY_TYPE_ID}_JRJ7Q8")
+    print_message("👥", "Found {n} beneficiaries with children.", n=len(grouped_children))
 
-printed = set()
+    # Create signature per parent
+    signature_to_parents = defaultdict(list)
+    for parent_id, child_list in grouped_children.items():
+        signature = json.dumps(normalize_children(child_list))
+        signature_to_parents[signature].append(parent_id)
 
-for group in dup_sets:
-    ids = sorted(group)
-    group_key = tuple(ids)
-    if group_key in printed:
-        continue
-    printed.add(group_key)
-    id_params = "".join([f"&id[]={i}" for i in ids])
-    merge_url = f"{BASE_URL}/crm/type/{ENTITY_TYPE_ID}/merge/?externalContextId={CONTEXT}{id_params}"
-    print(f"🔗 {merge_url}")
+    print_message("🔍", "Detecting duplicates by child name + DoB...")
 
-print("\n" + t("done"))
+    # Track sets of duplicates
+    dup_sets = set()
+    for parent_ids in signature_to_parents.values():
+        if len(parent_ids) > 1:
+            dup_sets.add(frozenset(parent_ids))
+
+    print_message("⚠️", "Found {n} potential duplicates.", n=len(dup_sets))
+
+    # Print merge links
+    BASE_URL = config["B24_WEBHOOK_URL"].split("/rest/")[0]
+    CONTEXT = config.get("MERGE_CONTEXT_ID", f"KANBAN_V11_DYNAMIC_{config['BENEFICIARY_ENTITY_TYPE_ID']}_JRJ7Q8")
+
+    printed = set()
+    for group in dup_sets:
+        ids = sorted(group)
+        group_key = tuple(ids)
+        if group_key in printed:
+            continue
+        printed.add(group_key)
+        id_params = "".join([f"&id[]={i}" for i in ids])
+        merge_url = f"{BASE_URL}/crm/type/{config['BENEFICIARY_ENTITY_TYPE_ID']}/merge/?externalContextId={CONTEXT}{id_params}"
+        print(f"🔗 {merge_url}")
+if __name__ == "__main__":
+    main()
