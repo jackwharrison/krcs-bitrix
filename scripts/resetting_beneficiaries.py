@@ -64,7 +64,7 @@ def update_beneficiary(beneficiary_id, fields):
 
 def process_beneficiary(item):
     beneficiary_id = item["id"]
-    parent_project_id = item.get("parentId1046")
+    parent_project_id = item.get("parentId1080")
 
     if not parent_project_id:
         print(t("⏩ Skipping {id}, no linked project.", id=beneficiary_id))
@@ -80,7 +80,7 @@ def process_beneficiary(item):
 
     update_fields = {
         config['PREVIOUS_PROJECTS_FIELD']: updated_projects,
-        "parentId1046": None,
+        "parentId1080": None,
         "ufCrm5_1756889079": None,
         "stageId": config['VERIFIED_STAGE_ID']
     }
