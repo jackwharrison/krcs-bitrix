@@ -59,8 +59,8 @@
   "DUPLICATE_FLAG_FIELD": "ufCrm5_1756876492769",
   "DUPLICATE_REASON_FIELD": "ufCrm5_1756876529587",
   "DUPLICATE_FLAG_ENUM": {
-    "unique": 179,
-    "duplicate": 181
+    "unique": 18870,
+    "duplicate": 18872
   },
   "NATIONAL_ID_FIELD": "ufCrm7_1756883826192",
   "PROJECT_TYPE_FIELD": "ufCrm7_1756894204297",
