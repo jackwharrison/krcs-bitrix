@@ -75,6 +75,7 @@
   "PREVIOUS_PROJECTS_FIELD": "ufCrm5_1756967246531",
   "IMPORT_FIELDS": {
     "First Name": "ufCrm5_1756457569829",
+    "Name": "title",
     "Last Name": "ufCrm5_1756457582507",
     "Patronymic": "ufCrm5_1756457899818",
     "National ID": "ufCrm5_1756874615326",
