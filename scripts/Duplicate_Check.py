@@ -122,11 +122,12 @@ def main():
         print(t("🔄 Checking item {i}/{total} (ID: {id})", i=i, total=len(candidates), id=item['id']))
         reason = is_duplicate(item, all_items)
         payload = {
-            config['DUPLICATE_FLAG_FIELD']: (
+            config['DUPLICATE_FLAG_FIELD']: str(
                 config['DUPLICATE_FLAG_ENUM']["duplicate"] if reason else config['DUPLICATE_FLAG_ENUM']["unique"]
             ),
             config['DUPLICATE_REASON_FIELD']: reason or ""
         }
+
         update_beneficiary(item["id"], payload)
 
         # Print merge URL if duplicate
