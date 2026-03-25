@@ -120,7 +120,8 @@ def main():
     all_items = fetch_all_beneficiaries()
     candidates = [
         item for item in all_items
-        if item.get("stageId") == config['REGISTRATION_STAGE_ID'] and not item.get(config['DUPLICATE_FLAG_FIELD'])
+        if item.get("stageId") == config['REGISTRATION_STAGE_ID']
+        and item.get(config['DUPLICATE_FLAG_FIELD']) != "Unique"
     ]
     print(t("📦 {n} total beneficiaries loaded.", n=len(all_items)))
     print(t("🎯 {n} items eligible for duplicate checking.\n", n=len(candidates)))
@@ -145,7 +146,7 @@ def main():
         print(t("🔄 Checking item {i}/{total} (ID: {id})", i=i, total=len(candidates), id=item['id']))
         reason = is_duplicate(item, all_items)
         payload = {
-            config['DUPLICATE_FLAG_FIELD']: "Duplicate" if reason else "Unique",
+            config['DUPLICATE_FLAG_FIELD']: "" if reason else "Unique",
             config['DUPLICATE_REASON_FIELD']: reason or ""
         }
 
