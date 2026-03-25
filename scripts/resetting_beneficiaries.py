@@ -89,25 +89,33 @@ def process_beneficiary(item):
 
 
 def get_all_completed_beneficiaries():
-    url = f"{config['B24_WEBHOOK_URL']}/crm.item.list"
     all_items = []
-    start = 0
+    last_id = 0
 
     while True:
-        res = requests.get(url, params={
-            "entityTypeId": config['BENEFICIARY_ENTITY_TYPE_ID'],
-            "filter[stageId]": config['COMPLETED_STAGE_ID'],
-            "start": start
-        }).json()
+        res = requests.post(
+            f"{config['B24_WEBHOOK_URL']}/crm.item.list",
+            json={
+                "entityTypeId": config['BENEFICIARY_ENTITY_TYPE_ID'],
+                "order": {"id": "ASC"},
+                "filter": {
+                    "stageId": config['COMPLETED_STAGE_ID'],
+                    ">id": last_id
+                },
+                "start": 0
+            }
+        ).json()
 
         items = res.get("result", {}).get("items", [])
-        all_items.extend(items)
-
-        if "next" not in res.get("result", {}):
+        if not items:
             break
 
-        start = res["result"]["next"]
+        all_items.extend(items)
+        last_id = items[-1]["id"]
         time.sleep(0.2)
+
+        if len(items) < 50:
+            break
 
     return all_items
 
