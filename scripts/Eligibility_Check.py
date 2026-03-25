@@ -93,19 +93,28 @@ def fetch_field_labels(entity_type_id):
 
 def fetch_all_items(entity_type_id):
     items = []
-    start = 0
+    last_id = 0
     while True:
-        res = requests.get(
+        res = requests.post(
             f"{config['B24_WEBHOOK_URL']}/crm.item.list",
-            params={"entityTypeId": entity_type_id, "start": start},
+            json={
+                "entityTypeId": entity_type_id,
+                "order": {"id": "ASC"},
+                "filter": {">id": last_id},
+                "start": 0
+            }
         ).json()
 
         batch = res.get("result", {}).get("items", [])
-        items.extend(batch)
-
-        if "next" not in res.get("result", {}):
+        if not batch:
             break
-        start = res["result"]["next"]
+
+        items.extend(batch)
+        last_id = batch[-1]["id"]
+        print(f"📄 Fetched {len(batch)} records. Last ID: {last_id}. Total so far: {len(items)}")
+
+        if len(batch) < 50:
+            break
 
     return items
 
@@ -114,24 +123,31 @@ def fetch_projects_by_stage(stage_id):
     select_fields = ["id", "title"] + project_fields
 
     projects = []
-    start = 0
+    last_id = 0
     while True:
-        res = requests.get(
+        res = requests.post(
             f"{config['B24_WEBHOOK_URL']}/crm.item.list",
-            params={
+            json={
                 "entityTypeId": config["PROJECT_ENTITY_TYPE_ID"],
-                "filter[stageId]": stage_id,
-                "select[]": select_fields,
-                "start": start
-            },
+                "order": {"id": "ASC"},
+                "filter": {
+                    "stageId": stage_id,
+                    ">id": last_id
+                },
+                "select": select_fields,
+                "start": 0
+            }
         ).json()
 
         batch = res.get("result", {}).get("items", [])
-        projects.extend(batch)
-
-        if "next" not in res.get("result", {}):
+        if not batch:
             break
-        start = res["result"]["next"]
+
+        projects.extend(batch)
+        last_id = batch[-1]["id"]
+
+        if len(batch) < 50:
+            break
 
     return projects
 
