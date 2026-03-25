@@ -57,32 +57,46 @@ def print_message(icon, message_key, **kwargs):
 
 def fetch_all_children():
     items = []
-    start = 0
+    last_id = 0
     while True:
-        res = requests.get(
+        res = requests.post(
             f"{config['B24_WEBHOOK_URL']}/crm.item.list",
-            params={"entityTypeId": config["CHILD_ENTITY_TYPE_ID"], "start": start}
+            json={
+                "entityTypeId": config["CHILD_ENTITY_TYPE_ID"],
+                "order": {"id": "ASC"},
+                "filter": {">id": last_id},
+                "start": 0
+            }
         ).json()
         batch = res.get("result", {}).get("items", [])
-        items.extend(batch)
-        if "next" not in res.get("result", {}):
+        if not batch:
             break
-        start = res["result"]["next"]
+        items.extend(batch)
+        last_id = batch[-1]["id"]
+        if len(batch) < 50:
+            break
     return items
 
 def fetch_all_beneficiaries():
     items = []
-    start = 0
+    last_id = 0
     while True:
-        res = requests.get(
+        res = requests.post(
             f"{config['B24_WEBHOOK_URL']}/crm.item.list",
-            params={"entityTypeId": config["BENEFICIARY_ENTITY_TYPE_ID"], "start": start}
+            json={
+                "entityTypeId": config["BENEFICIARY_ENTITY_TYPE_ID"],
+                "order": {"id": "ASC"},
+                "filter": {">id": last_id},
+                "start": 0
+            }
         ).json()
         batch = res.get("result", {}).get("items", [])
-        items.extend(batch)
-        if "next" not in res.get("result", {}):
+        if not batch:
             break
-        start = res["result"]["next"]
+        items.extend(batch)
+        last_id = batch[-1]["id"]
+        if len(batch) < 50:
+            break
     return items
 
 def update_beneficiary(ben_id, fields):
