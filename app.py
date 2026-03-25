@@ -29,6 +29,7 @@ translations = {
         "Remove Payment Duplicates": "Төлөм кайталанууларын алып салуу",
         "Check Duplicate IDs": "ID кайталануусун текшерүү",
         "Reset Beneficiaries": "Бенефициарларды баштапкы абалга келтирүү",
+        "Sync Beneficiaries to Kobo": "Бенефициарларды Koboго жүктөө",
         "System Configuration": "Системанын жөндөөлөрү",
         "121 API URL": "121 API дареги",
         "121 API Username": "121 API колдонуучу аты",
@@ -108,6 +109,7 @@ translations = {
         "Remove Payment Duplicates": "Удалить дубликаты платежей",
         "Check Duplicate IDs": "Проверка дубликатов ID",
         "Reset Beneficiaries": "Сбросить бенефициаров",
+        "Sync Beneficiaries to Kobo": "Синхронизировать бенефициаров с Kobo",
         "System Configuration": "Системная конфигурация",
         "121 API URL": "121 API ссылка",
         "121 API Username": "Имя пользователя 121 API",
@@ -204,6 +206,10 @@ SCRIPT_CONFIG = {
     "reset_beneficiaries": {
         "filename": "scripts/resetting_beneficiaries.py",
         "label_key": "Reset Beneficiaries"
+    },
+    "sync_to_kobo": {
+        "filename": "scripts/sync_to_kobo.py",
+        "label_key": "Sync Beneficiaries to Kobo"
     }
 }
 
