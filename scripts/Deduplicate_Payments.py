@@ -38,24 +38,28 @@ def t(key, **kwargs):
 def fetch_all_payments():
     """Fetch all payment records from Bitrix24."""
     all_items = []
-    start = 0
+    last_id = 0
 
     while True:
-        response = requests.get(
+        response = requests.post(
             f"{config['B24_WEBHOOK_URL']}/crm.item.list",
-            params={
+            json={
                 "entityTypeId": config['PAYMENT_ENTITY_TYPE_ID'],
-                "start": start
+                "order": {"id": "ASC"},
+                "filter": {">id": last_id},
+                "start": 0
             }
         ).json()
 
-        items = response.get("result", {}).get("items", [])
-        all_items.extend(items)
-
-        if "next" not in response.get("result", {}):
+        batch = response.get("result", {}).get("items", [])
+        if not batch:
             break
 
-        start = response["result"]["next"]
+        all_items.extend(batch)
+        last_id = batch[-1]["id"]
+
+        if len(batch) < 50:
+            break
 
     return all_items
 
