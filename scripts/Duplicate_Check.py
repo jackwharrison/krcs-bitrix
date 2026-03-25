@@ -39,20 +39,43 @@ def t(key, **kwargs):
 
 def fetch_all_beneficiaries():
     all_items = []
-    start = 0
+    last_id = 0
     while True:
-        response = requests.get(
+        raw = requests.post(
             f"{config['B24_WEBHOOK_URL']}/crm.item.list",
-            params={
+            json={
                 "entityTypeId": config['BENEFICIARY_ENTITY_TYPE_ID'],
-                "start": start
+                "order": {"id": "ASC"},
+                "filter": {">id": last_id},
+                "start": 0
             }
-        ).json()
-        items = response.get("result", {}).get("items", [])
-        all_items.extend(items)
-        if "next" not in response.get("result", {}):
+        )
+        if not raw.ok:
+            raise RuntimeError(f"API request failed (HTTP {raw.status_code}): {raw.text[:500]}")
+        if not raw.text.strip():
+            raise RuntimeError(
+                f"API returned an empty response. "
+                f"Check that B24_WEBHOOK_URL is correct and BENEFICIARY_ENTITY_TYPE_ID={config['BENEFICIARY_ENTITY_TYPE_ID']} is valid."
+            )
+        try:
+            response = raw.json()
+        except Exception:
+            raise RuntimeError(f"API returned non-JSON response: {raw.text[:500]}")
+
+        if "error" in response:
+            raise RuntimeError(f"Bitrix24 API error: {response['error']} — {response.get('error_description', '')}")
+
+        batch = response.get("result", {}).get("items", [])
+        if not batch:
             break
-        start = response["result"]["next"]
+
+        all_items.extend(batch)
+        last_id = batch[-1]["id"]
+        print(f"📄 Fetched {len(batch)} records. Last ID: {last_id}. Total so far: {len(all_items)}")
+
+        if len(batch) < 50:
+            break
+
     return all_items
 
 def update_beneficiary(item_id, payload):
