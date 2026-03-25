@@ -76,17 +76,17 @@ def build_merge_url(ids):
 
 
 def find_duplicate_groups(all_items):
-    """Group payments by national ID + project type, return groups with more than one record."""
+    """Group payments by PIN + project name, return groups with more than one record."""
     groups = defaultdict(list)
 
     for item in all_items:
-        national_id = item.get(config['NATIONAL_ID_FIELD'])
-        project_type = item.get(config['PROJECT_TYPE_FIELD'])
+        pin = item.get(config['PAYMENT_PIN'])
+        project_name = item.get(config['PAYMENT_PROJECT_NAME'])
 
-        if not national_id or not project_type:
+        if not pin or not project_name:
             continue
 
-        key = (str(national_id).strip(), str(project_type).strip())
+        key = (str(pin).strip(), str(project_name).strip())
         groups[key].append(item["id"])
 
     return {key: ids for key, ids in groups.items() if len(ids) > 1}
@@ -105,13 +105,13 @@ def main():
         return
 
     printed = set()
-    for (national_id, project_type), ids in duplicate_groups.items():
+    for (pin, project_name), ids in duplicate_groups.items():
         group = frozenset(ids)
         if group in printed:
             continue
         printed.add(group)
         url = build_merge_url(ids)
-        print(f"⚠️ Duplicate payments for ID {national_id} / {project_type}: {ids}")
+        print(f"⚠️ Duplicate payments for PIN {pin} / {project_name}: {ids}")
         print(f"🔗 {url}")
 
     print(f"\n✅ {t('Done. Found {count} duplicate groups.', count=len(duplicate_groups))}")
