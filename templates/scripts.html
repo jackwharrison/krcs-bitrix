@@ -6,125 +6,382 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{{ t("Run Scripts") }}</title>
 
-    <!-- Bootstrap to match the Import page -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 
     <style>
-        body { background-color: #f4f4f4; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --red: #CC2229;
+            --red-dark: #a81b21;
+            --red-light: #fdf2f2;
+            --navy: #1a2340;
+            --navy-mid: #2c3a5c;
+            --text: #1e2535;
+            --text-muted: #6b7490;
+            --border: #e4e7f0;
+            --bg: #f6f7fb;
+            --white: #ffffff;
+            --success-bg: #edfaf4;
+            --success-border: #22c55e;
+            --warning-bg: #fffbeb;
+            --warning-border: #f59e0b;
+            --error-bg: #fef2f2;
+            --error-border: #ef4444;
+            --info-bg: #eff6ff;
+            --info-border: #3b82f6;
+            --radius: 10px;
+            --shadow: 0 1px 3px rgba(0,0,0,0.07), 0 4px 16px rgba(0,0,0,0.06);
+            --shadow-lg: 0 4px 6px rgba(0,0,0,0.05), 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── Header ── */
         .header {
-            background-color: #ffffff;
-            border-bottom: 2px solid #dee2e6;
-            padding: 1rem;
+            background: var(--white);
+            border-bottom: 1px solid var(--border);
+            padding: 0 2rem;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             position: sticky;
-            top: 0; z-index: 1000;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 1px 0 var(--border), 0 2px 8px rgba(0,0,0,0.04);
         }
-        .header img { height: 40px; margin-right: 10px; }
-        .script-card {
-            background: #fff;
-            border: 1px solid #dee2e6;
-            border-radius: .75rem;
-            box-shadow: 0 4px 8px rgba(0,0,0,.05);
-            padding: 1.25rem;
-            margin-bottom: 1rem;
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
         }
-        .message {
-            padding: .9rem 1rem;
-            border-radius: .5rem;
-            display: flex; align-items: center; gap: .6rem;
+
+        .header-logo {
+            height: 34px;
+            width: auto;
+        }
+
+        .header-divider {
+            width: 1px;
+            height: 24px;
+            background: var(--border);
+        }
+
+        .header-title {
             font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--navy);
+            letter-spacing: -0.01em;
         }
-        .message .icon { font-size: 1.2rem; }
-        .message.info    { background-color: #e9f5ff; border-left: 5px solid #0d6efd; }
-        .message.success { background-color: #eafaf1; border-left: 5px solid #198754; }
-        .message.warning { background-color: #fff8e5; border-left: 5px solid #ffc107; }
-        .message.error   { background-color: #fbeaea; border-left: 5px solid #dc3545; }
+
+        /* ── Language Selector ── */
+        .lang-select {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text);
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 6px 10px;
+            cursor: pointer;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+
+        .lang-select:focus {
+            border-color: var(--red);
+        }
+
+        /* ── Main Layout ── */
+        .main {
+            flex: 1;
+            max-width: 780px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 2.5rem 1.5rem;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--navy);
+            letter-spacing: -0.02em;
+            margin-bottom: 0.35rem;
+        }
+
+        .page-header p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        /* ── Script Cards ── */
+        .scripts-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .script-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: box-shadow 0.2s, border-color 0.2s;
+        }
+
+        .script-card:hover {
+            box-shadow: var(--shadow-lg);
+            border-color: #c8cfe0;
+        }
+
+        .script-card.active {
+            border-color: var(--red);
+        }
+
+        .script-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.25rem;
+            gap: 1rem;
+        }
+
+        .script-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .script-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+            background: var(--red-light);
+        }
+
+        .script-name {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .run-btn {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--white);
+            background: var(--red);
+            border: none;
+            border-radius: 7px;
+            padding: 8px 18px;
+            cursor: pointer;
+            transition: background 0.15s, transform 0.1s;
+            white-space: nowrap;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .run-btn:hover { background: var(--red-dark); }
+        .run-btn:active { transform: scale(0.97); }
+
+        .run-btn .btn-spinner {
+            display: none;
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255,255,255,0.4);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+
+        .run-btn.loading .btn-spinner { display: inline-block; }
+        .run-btn.loading .btn-label { opacity: 0.7; }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ── Results ── */
+        .result-area {
+            border-top: 1px solid var(--border);
+            padding: 1rem 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            background: #fafbfd;
+        }
+
+        .result-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+            margin-bottom: 0.35rem;
+        }
+
+        .msg {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.6rem;
+            padding: 0.55rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            font-family: 'DM Mono', monospace;
+            font-size: 0.82rem;
+        }
+
+        .msg-icon { flex-shrink: 0; margin-top: 1px; }
+
+        .msg.success { background: var(--success-bg); border-left: 3px solid var(--success-border); color: #166534; }
+        .msg.warning { background: var(--warning-bg); border-left: 3px solid var(--warning-border); color: #92400e; }
+        .msg.error   { background: var(--error-bg);   border-left: 3px solid var(--error-border);   color: #991b1b; }
+        .msg.info    { background: var(--info-bg);    border-left: 3px solid var(--info-border);    color: #1e40af; }
+
+        .msg a {
+            color: inherit;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+            word-break: break-all;
+        }
+
+        /* ── Footer ── */
+        footer {
+            text-align: center;
+            padding: 2rem 1.5rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border);
+            background: var(--white);
+            margin-top: auto;
+            line-height: 1.8;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 520px) {
+            .header { padding: 0 1rem; }
+            .main { padding: 1.5rem 1rem; }
+            .script-name { font-size: 0.875rem; }
+        }
     </style>
 </head>
 <body>
 
-    <!-- Header + language selector (mirrors import page) -->
-    <div class="header d-flex justify-content-between align-items-center">
-        <div class="d-flex align-items-center">
-            <img src="/static/krcs.png" alt="KRCS">
-            <h4 class="mb-0 ms-3">{{ t("Run Scripts") }}</h4>
+    <div class="header">
+        <div class="header-left">
+            <img src="/static/krcs.png" alt="KRCS" class="header-logo">
+            <div class="header-divider"></div>
+            <span class="header-title">{{ t("Run Scripts") }}</span>
         </div>
-        <div>
-            <form method="GET" action="{{ url_for('scripts_page') }}" id="langForm">
-                <select name="lang" class="form-select" onchange="document.getElementById('langForm').submit()">
-                    <option value="en" {% if lang == 'en' %}selected{% endif %}>English</option>
-                    <option value="ky" {% if lang == 'ky' %}selected{% endif %}>Кыргызча</option>
-                    <option value="ru" {% if lang == 'ru' %}selected{% endif %}>Русский</option>
-                </select>
-            </form>
-        </div>
+        <form method="GET" action="/" id="langForm">
+            <select class="lang-select" name="lang" onchange="document.getElementById('langForm').submit()">
+                <option value="en" {% if lang == 'en' %}selected{% endif %}>English</option>
+                <option value="ky" {% if lang == 'ky' %}selected{% endif %}>Кыргызча</option>
+                <option value="ru" {% if lang == 'ru' %}selected{% endif %}>Русский</option>
+            </select>
+        </form>
     </div>
 
-    <div class="container mt-4">
-
-        <!-- Link to System Config (styled like a top CTA) -->
-        <div class="d-flex justify-content-end mb-3">
-            <a class="btn btn-success" href="{{ url_for('import_excel', lang=lang) }}">
-                {{ t("Import from Excel") }}
-            </a>
+    <div class="main">
+        <div class="page-header">
+            <h1>{{ t("Run Scripts") }}</h1>
+            <p>Select a script below to run it against your Bitrix24 data.</p>
         </div>
 
-        <!-- Script cards -->
-        {% for key, config in scripts.items() %}
-            <div class="script-card">
-                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-                    <div class="fw-semibold">
-                        {{ t(config.label_key) }}
+        <div class="scripts-list">
+            {% set icons = {
+                'deduplicate': '👨‍👩‍👧‍👦',
+                'check_eligibility': '✅',
+                'remove_payment_duplicates': '💳',
+                'check_duplicate_ids': '🪪',
+                'reset_beneficiaries': '🔄'
+            } %}
+
+            {% for key, cfg in scripts.items() %}
+            <div class="script-card {% if selected_script == key and result %}active{% endif %}">
+                <div class="script-header">
+                    <div class="script-info">
+                        <div class="script-icon">{{ icons.get(key, '⚙️') }}</div>
+                        <span class="script-name">{{ t(cfg.label_key) }}</span>
                     </div>
-                    <form method="POST" action="{{ url_for('scripts_page', lang=lang) }}" class="d-flex gap-2">
+                    <form method="POST" action="/?lang={{ lang }}" onsubmit="handleRun(this)">
                         <input type="hidden" name="script" value="{{ key }}">
                         <input type="hidden" name="lang" value="{{ lang }}">
-                        <button type="submit" class="btn btn-primary">
-                            {{ t("Run") }}
+                        <button type="submit" class="run-btn" id="btn-{{ key }}">
+                            <span class="btn-spinner"></span>
+                            <span class="btn-label">{{ t("Run") }}</span>
                         </button>
                     </form>
                 </div>
 
                 {% if selected_script == key and result %}
-                    <div class="mt-3">
-                        {% for line in result.split('\n') %}
-                            {% set ln = line.strip() %}
-                            {% if ln %}
-                                {% if '❌' in ln %}
-                                    <div class="message error">
-                                        <span class="icon">❌</span> {{ ln | replace('❌', '') }}
-                                    </div>
-                                {% elif '⚠️' in ln %}
-                                    <div class="message warning">
-                                        <span class="icon">⚠️</span> {{ ln | replace('⚠️', '') }}
-                                    </div>
-                                {% elif '✅' in ln or '✔' in ln %}
-                                    <div class="message success">
-                                        <span class="icon">✅</span> {{ ln | replace('✅', '') }}
-                                    </div>
-                                {% elif ln.startswith('🔗') %}
-                                    <div class="message success">
-                                        <span class="icon">🔗</span>
-                                        <a href="{{ ln[2:] }}" target="_blank">{{ ln[2:] }}</a>
-                                    </div>
-                                {% else %}
-                                    <div class="message info">
-                                        <span class="icon">💬</span> {{ ln }}
-                                    </div>
-                                {% endif %}
+                <div class="result-area">
+                    <div class="result-label">Output</div>
+                    {% for line in result.split('\n') %}
+                        {% set ln = line.strip() %}
+                        {% if ln %}
+                            {% if '❌' in ln %}
+                                <div class="msg error"><span class="msg-icon">❌</span><span>{{ ln | replace('❌', '') | trim }}</span></div>
+                            {% elif '⚠️' in ln %}
+                                <div class="msg warning"><span class="msg-icon">⚠️</span><span>{{ ln | replace('⚠️', '') | trim }}</span></div>
+                            {% elif '✅' in ln or '✔' in ln %}
+                                <div class="msg success"><span class="msg-icon">✅</span><span>{{ ln | replace('✅', '') | replace('✔', '') | trim }}</span></div>
+                            {% elif ln.startswith('🔗') %}
+                                <div class="msg info"><span class="msg-icon">🔗</span><a href="{{ ln[2:] | trim }}" target="_blank">{{ ln[2:] | trim }}</a></div>
+                            {% else %}
+                                <div class="msg info"><span class="msg-icon">💬</span><span>{{ ln }}</span></div>
                             {% endif %}
-                        {% endfor %}
-                    </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
                 {% endif %}
             </div>
-        {% endfor %}
-
-        <footer class="text-center mt-4 py-4" style="color:#666;">
-    <p>{{ t("Developed by 510 @ Netherlands Red Cross. Maintained by Kyrgyzstan Red Crescent") }}</p>
-    <p>{{ t("For any support, contact sh.abdiseitov@redcrescent.kg") }}</p>
-        </footer>
+            {% endfor %}
+        </div>
     </div>
 
-    <!-- Bootstrap JS (for potential alerts later) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <footer>
+        <p>{{ t("Developed by 510 @ Netherlands Red Cross. Maintained by Kyrgyzstan Red Crescent") }}</p>
+        <p>{{ t("For any support, contact sh.abdiseitov@redcrescent.kg") }}</p>
+    </footer>
+
+    <script>
+        function handleRun(form) {
+            const btn = form.querySelector('.run-btn');
+            btn.classList.add('loading');
+            btn.disabled = true;
+        }
+    </script>
 </body>
 </html>
