@@ -11,10 +11,11 @@ translations = {
     'ky': {
         "Run Scripts": "Скрипттерди иштетүү",
         "Run": "Ишке киргизүү",
+        "Sync to Kobo": "Koboго синхрондоштуруу",
+        "Check Duplicate IDs and Names": "ID жана толук аттарды кайталануу үчүн текшерүү",
         "Check for duplicated households": "Үй-бүлөлөрдү кайталануу үчүн текшерүү",
         "Check Eligibility": "Татыктуулукту текшерүү",
         "Remove Payment Duplicates": "Төлөм кайталанууларын алып салуу",
-        "Check Duplicate IDs": "ID кайталануусун текшерүү",
         "Reset Beneficiaries": "Бенефициарларды баштапкы абалга келтирүү",
         "Developed by 510 @ Netherlands Red Cross. Maintained by Kyrgyzstan Red Crescent": "Разработано 510 при Нидерландском Красном Кресте. Поддерживается Красным Полумесяцем Кыргызстана.",
         "For any support, contact sh.abdiseitov@redcrescent.kg": "Көмөк керек болсо, sh.abdiseitov@redcrescent.kg дарегине кайрылыңыз.",
@@ -22,10 +23,11 @@ translations = {
     'ru': {
         "Run Scripts": "Запустить скрипты",
         "Run": "Запустить",
+        "Sync to Kobo": "Синхронизация с Kobo",
+        "Check Duplicate IDs and Names": "Проверка дубликатов ID и полных имён",
         "Check for duplicated households": "Проверка дубликатов домохозяйств",
         "Check Eligibility": "Проверка соответствия",
         "Remove Payment Duplicates": "Удалить дубликаты платежей",
-        "Check Duplicate IDs": "Проверка дубликатов ID",
         "Reset Beneficiaries": "Сбросить бенефициаров",
         "Developed by 510 @ Netherlands Red Cross. Maintained by Kyrgyzstan Red Crescent": "Разработано 510 при Нидерландском Красном Кресте. Поддерживается Красным Полумесяцем Кыргызстана.",
         "For any support, contact sh.abdiseitov@redcrescent.kg": "По вопросам поддержки обращайтесь: sh.abdiseitov@redcrescent.kg",
@@ -36,6 +38,14 @@ def translate(key, lang):
     return translations.get(lang, {}).get(key, key)
 
 SCRIPT_CONFIG = {
+    "sync_to_kobo": {
+        "filename": "scripts/sync_to_kobo.py",
+        "label_key": "Sync to Kobo"
+    },
+    "check_duplicate_ids": {
+        "filename": "scripts/Duplicate_Check.py",
+        "label_key": "Check Duplicate IDs and Names"
+    },
     "deduplicate": {
         "filename": "scripts/Child_deduplication.py",
         "label_key": "Check for duplicated households"
@@ -47,10 +57,6 @@ SCRIPT_CONFIG = {
     "remove_payment_duplicates": {
         "filename": "scripts/Deduplicate_Payments.py",
         "label_key": "Remove Payment Duplicates"
-    },
-    "check_duplicate_ids": {
-        "filename": "scripts/Duplicate_Check.py",
-        "label_key": "Check Duplicate IDs"
     },
     "reset_beneficiaries": {
         "filename": "scripts/resetting_beneficiaries.py",

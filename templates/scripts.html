@@ -18,7 +18,6 @@
             --red-dark: #a81b21;
             --red-light: #fdf2f2;
             --navy: #1a2340;
-            --navy-mid: #2c3a5c;
             --text: #1e2535;
             --text-muted: #6b7490;
             --border: #e4e7f0;
@@ -46,7 +45,6 @@
             flex-direction: column;
         }
 
-        /* ── Header ── */
         .header {
             background: var(--white);
             border-bottom: 1px solid var(--border);
@@ -67,10 +65,7 @@
             gap: 1rem;
         }
 
-        .header-logo {
-            height: 34px;
-            width: auto;
-        }
+        .header-logo { height: 34px; width: auto; }
 
         .header-divider {
             width: 1px;
@@ -85,7 +80,6 @@
             letter-spacing: -0.01em;
         }
 
-        /* ── Language Selector ── */
         .lang-select {
             font-family: 'DM Sans', sans-serif;
             font-size: 0.85rem;
@@ -100,11 +94,8 @@
             transition: border-color 0.15s;
         }
 
-        .lang-select:focus {
-            border-color: var(--red);
-        }
+        .lang-select:focus { border-color: var(--red); }
 
-        /* ── Main Layout ── */
         .main {
             flex: 1;
             max-width: 780px;
@@ -113,9 +104,7 @@
             padding: 2.5rem 1.5rem;
         }
 
-        .page-header {
-            margin-bottom: 2rem;
-        }
+        .page-header { margin-bottom: 2rem; }
 
         .page-header h1 {
             font-size: 1.5rem;
@@ -128,10 +117,8 @@
         .page-header p {
             font-size: 0.9rem;
             color: var(--text-muted);
-            font-weight: 400;
         }
 
-        /* ── Script Cards ── */
         .scripts-list {
             display: flex;
             flex-direction: column;
@@ -152,9 +139,7 @@
             border-color: #c8cfe0;
         }
 
-        .script-card.active {
-            border-color: var(--red);
-        }
+        .script-card.active { border-color: var(--red); }
 
         .script-header {
             display: flex;
@@ -227,11 +212,8 @@
         .run-btn.loading .btn-spinner { display: inline-block; }
         .run-btn.loading .btn-label { opacity: 0.7; }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* ── Results ── */
         .result-area {
             border-top: 1px solid var(--border);
             padding: 1rem 1.25rem;
@@ -256,7 +238,6 @@
             gap: 0.6rem;
             padding: 0.55rem 0.75rem;
             border-radius: 6px;
-            font-size: 0.875rem;
             line-height: 1.5;
             font-family: 'DM Mono', monospace;
             font-size: 0.82rem;
@@ -276,7 +257,6 @@
             word-break: break-all;
         }
 
-        /* ── Footer ── */
         footer {
             text-align: center;
             padding: 2rem 1.5rem;
@@ -288,7 +268,6 @@
             line-height: 1.8;
         }
 
-        /* ── Responsive ── */
         @media (max-width: 520px) {
             .header { padding: 0 1rem; }
             .main { padding: 1.5rem 1rem; }
@@ -321,10 +300,11 @@
 
         <div class="scripts-list">
             {% set icons = {
+                'sync_to_kobo': '☁️',
+                'check_duplicate_ids': '🪪',
                 'deduplicate': '👨‍👩‍👧‍👦',
                 'check_eligibility': '✅',
                 'remove_payment_duplicates': '💳',
-                'check_duplicate_ids': '🪪',
                 'reset_beneficiaries': '🔄'
             } %}
 
@@ -383,5 +363,6 @@
             btn.disabled = true;
         }
     </script>
+
 </body>
 </html>
